@@ -13,6 +13,7 @@ package org.eclipse.rdf4j.sail.lmdb;
 import static org.eclipse.rdf4j.sail.lmdb.LmdbUtil.E;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
+import static org.lwjgl.util.lmdb.LMDB.MDB_NOTLS;
 import static org.lwjgl.util.lmdb.LMDB.MDB_RDONLY;
 import static org.lwjgl.util.lmdb.LMDB.mdb_txn_abort;
 import static org.lwjgl.util.lmdb.LMDB.mdb_txn_begin;
@@ -26,6 +27,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.concurrent.locks.StampedLock;
 
+import org.eclipse.rdf4j.sail.SailException;
 import org.eclipse.rdf4j.sail.lmdb.LmdbUtil.Transaction;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
@@ -52,7 +54,7 @@ class TxnManager {
 		long readTxn;
 		try (MemoryStack stack = stackPush()) {
 			PointerBuffer pp = stack.mallocPointer(1);
-			E(mdb_txn_begin(env, NULL, MDB_RDONLY, pp));
+			E(mdb_txn_begin(env, NULL, MDB_RDONLY | MDB_NOTLS, pp));
 			readTxn = pp.get(0);
 		}
 		return readTxn;
@@ -80,7 +82,7 @@ class TxnManager {
 	 * @throws IOException if the transaction cannot be started for some reason
 	 */
 	Txn createReadTxn() throws IOException {
-		Txn txnRef = new Txn(createReadTxnInternal());
+		Txn txnRef = new Txn(0);
 		synchronized (active) {
 			active.put(txnRef, Boolean.TRUE);
 		}
@@ -170,6 +172,13 @@ class TxnManager {
 		}
 
 		long get() {
+			if (txn == 0) {
+				try {
+					txn = startReadTxn();
+				} catch (IOException e) {
+					throw new SailException(e);
+				}
+			}
 			return txn;
 		}
 
@@ -184,6 +193,8 @@ class TxnManager {
 		}
 
 		private void free(long txn) {
+			if (txn == 0)
+				return;
 			switch (mode) {
 			case RESET:
 				synchronized (pool) {
@@ -221,10 +232,10 @@ class TxnManager {
 		 */
 		void reset() throws IOException {
 			if (staleTxns == null) {
-				staleTxns = new ArrayList<>(5);
+				staleTxns = new ArrayList<>();
 			}
 			staleTxns.add(txn);
-			txn = createReadTxnInternal();
+			txn = 0;
 		}
 
 		/**
@@ -232,9 +243,11 @@ class TxnManager {
 		 */
 		void setActive(boolean active) throws IOException {
 			if (active) {
+				long txn = get();
 				E(mdb_txn_renew(txn));
 				version++;
 			} else {
+				long txn = get();
 				mdb_txn_reset(txn);
 			}
 			if (staleTxns != null) {

@@ -273,36 +273,42 @@ class LmdbSailStore implements SailStore {
 
 	CloseableIteration<Resource, SailException> getContexts() throws IOException {
 		Txn txn = tripleStore.getTxnManager().createReadTxn();
-		RecordIterator records = tripleStore.getAllTriplesSortedByContext(txn);
-		CloseableIteration<? extends Statement, SailException> stIter1;
-		if (records == null) {
-			// Iterator over all statements
-			stIter1 = createStatementIterator(txn, null, null, null, true);
-		} else {
-			stIter1 = new LmdbStatementIterator(records, valueStore);
+		try {
+			RecordIterator records = tripleStore.getAllTriplesSortedByContext(txn);
+			CloseableIteration<? extends Statement, SailException> stIter1;
+			if (records == null) {
+				// Iterator over all statements
+				stIter1 = createStatementIterator(txn, null, null, null, true);
+			} else {
+				stIter1 = new LmdbStatementIterator(records, valueStore);
+			}
+
+			FilterIteration<Statement, SailException> stIter2 = new FilterIteration<>(
+					stIter1) {
+				@Override
+				protected boolean accept(Statement st) {
+					return st.getContext() != null;
+				}
+			};
+
+			return new ConvertingIteration<>(stIter2) {
+				@Override
+				protected Resource convert(Statement sourceObject) throws SailException {
+					return sourceObject.getContext();
+				}
+
+				@Override
+				protected void handleClose() throws SailException {
+					// correctly close read txn
+					txn.close();
+					super.handleClose();
+				}
+			};
+		} catch (Throwable t) {
+			txn.close();
+			throw t;
 		}
 
-		FilterIteration<Statement, SailException> stIter2 = new FilterIteration<>(
-				stIter1) {
-			@Override
-			protected boolean accept(Statement st) {
-				return st.getContext() != null;
-			}
-		};
-
-		return new ConvertingIteration<>(stIter2) {
-			@Override
-			protected Resource convert(Statement sourceObject) throws SailException {
-				return sourceObject.getContext();
-			}
-
-			@Override
-			protected void handleClose() throws SailException {
-				// correctly close read txn
-				txn.close();
-				super.handleClose();
-			}
-		};
 	}
 
 	/**

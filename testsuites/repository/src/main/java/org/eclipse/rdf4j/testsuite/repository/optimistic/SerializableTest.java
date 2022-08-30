@@ -14,22 +14,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.common.transaction.IsolationLevel;
 import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.sail.SailConflictException;
 import org.eclipse.rdf4j.testsuite.repository.OptimisticIsolationTest;
 import org.junit.After;
@@ -42,7 +43,6 @@ import org.junit.Test;
  * Tests on behavior of SERIALIZABLE transactions.
  *
  * @author jeen
- *
  */
 public class SerializableTest {
 
@@ -169,6 +169,7 @@ public class SerializableTest {
 		assertEquals(1, size(a, null, RDF.TYPE, PAINTER, false));
 		a.commit();
 		b.prepare();
+		b.commit();
 	}
 
 	@Test
@@ -299,7 +300,6 @@ public class SerializableTest {
 			assertTrue(e.getCause() instanceof SailConflictException
 					|| e.getMessage().contains("Observed State has Changed"));
 			assertEquals(0, size(a, null, RDF.TYPE, PAINTING, false));
-		} finally {
 			b.rollback();
 		}
 	}
@@ -700,18 +700,15 @@ public class SerializableTest {
 		assertEquals(13, size(a, null, null, null, false));
 	}
 
-	private int size(RepositoryConnection con, Resource subj, IRI pred, Value obj, boolean inf, Resource... ctx)
-			throws Exception {
-		return QueryResults.asList(con.getStatements(subj, pred, obj, inf, ctx)).size();
+	private long size(RepositoryConnection con, Resource subj, IRI pred, Value obj, boolean inf, Resource... ctx) {
+		try (RepositoryResult<Statement> statements = con.getStatements(subj, pred, obj, inf, ctx)) {
+			return statements.stream().count();
+		}
 	}
 
-	private List<Value> eval(String var, RepositoryConnection con, String qry) throws Exception {
+	private List<Value> eval(String var, RepositoryConnection con, String qry) {
 		try (TupleQueryResult result = con.prepareTupleQuery(QueryLanguage.SPARQL, qry, NS).evaluate()) {
-			List<Value> list = new ArrayList<>();
-			while (result.hasNext()) {
-				list.add(result.next().getValue(var));
-			}
-			return list;
+			return result.stream().map(b -> b.getValue(var)).collect(Collectors.toList());
 		}
 	}
 

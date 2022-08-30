@@ -36,6 +36,7 @@ import static org.lwjgl.util.lmdb.LMDB.mdb_stat;
 import static org.lwjgl.util.lmdb.LMDB.mdb_txn_abort;
 import static org.lwjgl.util.lmdb.LMDB.mdb_txn_begin;
 import static org.lwjgl.util.lmdb.LMDB.mdb_txn_commit;
+import static org.lwjgl.util.lmdb.LMDB.nmdb_env_set_maxreaders;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,6 +72,7 @@ final class TxnRecordCache {
 
 			E(mdb_env_set_maxdbs(env, 2));
 			E(mdb_env_set_mapsize(env, mapSize));
+			nmdb_env_set_maxreaders(env, 126 * 4);
 
 			int flags = MDB_NOTLS | MDB_NOSYNC | MDB_NOMETASYNC;
 
@@ -185,7 +187,7 @@ final class TxnRecordCache {
 			try (MemoryStack stack = MemoryStack.stackPush()) {
 				PointerBuffer pp = stack.mallocPointer(1);
 
-				E(mdb_txn_begin(env, NULL, MDB_RDONLY, pp));
+				E(mdb_txn_begin(env, NULL, MDB_RDONLY | MDB_NOTLS, pp));
 				txn = pp.get(0);
 
 				E(mdb_cursor_open(txn, dbi, pp));

@@ -38,6 +38,7 @@ import static org.lwjgl.util.lmdb.LMDB.mdb_txn_begin;
 import static org.lwjgl.util.lmdb.LMDB.mdb_txn_commit;
 import static org.lwjgl.util.lmdb.LMDB.mdb_txn_renew;
 import static org.lwjgl.util.lmdb.LMDB.mdb_txn_reset;
+import static org.lwjgl.util.lmdb.LMDB.nmdb_env_set_maxreaders;
 
 import java.io.File;
 import java.io.IOException;
@@ -189,6 +190,8 @@ class ValueStore extends AbstractValueFactory {
 			E(mdb_env_create(pp));
 			env = pp.get(0);
 		}
+
+		nmdb_env_set_maxreaders(env, 126 * 8);
 
 		// Open environment
 		int flags = MDB_NOTLS;

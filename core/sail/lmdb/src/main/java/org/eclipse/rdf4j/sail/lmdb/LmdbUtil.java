@@ -17,6 +17,7 @@ package org.eclipse.rdf4j.sail.lmdb;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.util.lmdb.LMDB.MDB_NOTFOUND;
+import static org.lwjgl.util.lmdb.LMDB.MDB_NOTLS;
 import static org.lwjgl.util.lmdb.LMDB.MDB_RDONLY;
 import static org.lwjgl.util.lmdb.LMDB.MDB_SUCCESS;
 import static org.lwjgl.util.lmdb.LMDB.mdb_dbi_open;
@@ -72,7 +73,7 @@ final class LmdbUtil {
 			long txn;
 			if (writeTxn == 0) {
 				PointerBuffer pp = stack.mallocPointer(1);
-				E(mdb_txn_begin(env, NULL, MDB_RDONLY, pp));
+				E(mdb_txn_begin(env, NULL, MDB_RDONLY | MDB_NOTLS, pp));
 				txn = pp.get(0);
 			} else {
 				txn = writeTxn;

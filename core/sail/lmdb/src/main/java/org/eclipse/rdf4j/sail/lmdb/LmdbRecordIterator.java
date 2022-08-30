@@ -108,6 +108,7 @@ class LmdbRecordIterator implements RecordIterator {
 		try {
 			this.txnRefVersion = txnRef.version();
 			this.txn = txnRef.get();
+			assert this.txn != 0;
 
 			try (MemoryStack stack = MemoryStack.stackPush()) {
 				PointerBuffer pp = stack.mallocPointer(1);

@@ -228,9 +228,16 @@ public class IsolationLevelTest {
 		});
 		reader.start();
 		writer.start();
-		reader.join();
-		writer.join();
+		joinOrInterrupt(reader);
+		joinOrInterrupt(writer);
 		assertNotFailed();
+	}
+
+	private static void joinOrInterrupt(Thread thread) throws InterruptedException {
+		thread.join(1000);
+		if (thread.isAlive()) {
+			thread.interrupt();
+		}
 	}
 
 	/**
@@ -289,8 +296,8 @@ public class IsolationLevelTest {
 		});
 		reader.start();
 		writer.start();
-		reader.join();
-		writer.join();
+		joinOrInterrupt(reader);
+		joinOrInterrupt(writer);
 		assertNotFailed();
 	}
 
@@ -387,8 +394,8 @@ public class IsolationLevelTest {
 		});
 		reader.start();
 		writer.start();
-		reader.join();
-		writer.join();
+		joinOrInterrupt(reader);
+		joinOrInterrupt(writer);
 		assertNotFailed();
 	}
 
@@ -411,8 +418,8 @@ public class IsolationLevelTest {
 		Thread t2 = incrementBy(start, observed, level, vf, subj, pred, 5);
 		t2.start();
 		t1.start();
-		t2.join();
-		t1.join();
+		joinOrInterrupt(t2);
+		joinOrInterrupt(t1);
 		assertNotFailed();
 		try (RepositoryConnection check = store.getConnection()) {
 			check.begin(level);
@@ -500,7 +507,7 @@ public class IsolationLevelTest {
 
 	protected synchronized void assertNotFailed() {
 		if (failed != null) {
-			throw (AssertionError) new AssertionError(failedMessage).initCause(failed);
+			throw (AssertionError) new AssertionError(failedMessage, failed);
 		}
 	}
 

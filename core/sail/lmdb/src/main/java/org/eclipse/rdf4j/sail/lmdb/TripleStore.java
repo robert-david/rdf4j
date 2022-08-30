@@ -192,7 +192,7 @@ class TripleStore implements Closeable {
 		}
 
 		mdb_env_set_maxdbs(env, 12);
-		nmdb_env_set_maxreaders(env, 256);
+		nmdb_env_set_maxreaders(env, 126 * 16);
 
 		// Open environment
 		int flags = MDB_NOTLS;

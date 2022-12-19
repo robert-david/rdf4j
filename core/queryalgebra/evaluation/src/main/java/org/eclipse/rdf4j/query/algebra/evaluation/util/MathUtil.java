@@ -51,8 +51,22 @@ public class MathUtil {
 	 * @throws ValueExprEvaluationException
 	 */
 	public static Literal compute(Literal leftLit, Literal rightLit, MathOp op) throws ValueExprEvaluationException {
-		final ValueFactory vf = SimpleValueFactory.getInstance();
+		return compute(leftLit, rightLit, op, SimpleValueFactory.getInstance());
+	}
 
+	/**
+	 * Computes the result of applying the supplied math operator on the supplied left and right operand.
+	 *
+	 * @param leftLit  a numeric datatype literal
+	 * @param rightLit a numeric datatype literal
+	 * @param op       a mathematical operator, as definied by MathExpr.MathOp.
+	 * @param vf       a value factory used to construct the results.
+	 * @return a numeric datatype literal containing the result of the operation. The result will be datatype according
+	 *         to the most specific data type the two operands have in common per the SPARQL/XPath spec.
+	 * @throws ValueExprEvaluationException
+	 */
+	public static Literal compute(Literal leftLit, Literal rightLit, MathOp op, ValueFactory vf)
+			throws ValueExprEvaluationException {
 		IRI leftDatatype = leftLit.getDatatype();
 		IRI rightDatatype = rightLit.getDatatype();
 

@@ -15,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,8 @@ import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.QueryResults;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
@@ -100,8 +103,7 @@ public class StrictEvaluationStrategyTest {
 	@Test
 	public void testEvaluateRegexFlags() throws Exception {
 
-		String query = "SELECT ?a WHERE { "
-				+ "VALUES ?a { \"foo.bar\" \"foo bar\" } \n"
+		String query = "SELECT ?a WHERE { " + "VALUES ?a { \"foo.bar\" \"foo bar\" } \n"
 				+ "FILTER REGEX(str(?a), \"foo.bar\")}";
 
 		ParsedQuery pq = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, query, null);
@@ -113,28 +115,24 @@ public class StrictEvaluationStrategyTest {
 		assertThat(bindingSets).hasSize(2);
 
 		// match with q flag
-		query = "SELECT ?a WHERE { "
-				+ "VALUES ?a { \"foo.bar\" \"foo bar\" } \n"
+		query = "SELECT ?a WHERE { " + "VALUES ?a { \"foo.bar\" \"foo bar\" } \n"
 				+ "FILTER REGEX(str(?a), \"foo.bar\", \"q\")}";
 
 		pq = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, query, null);
 
-		result = strategy.evaluate(pq.getTupleExpr(),
-				new EmptyBindingSet());
+		result = strategy.evaluate(pq.getTupleExpr(), new EmptyBindingSet());
 
 		bindingSets = QueryResults.asList(result);
 		assertThat(bindingSets).hasSize(1);
 		assertThat(bindingSets.get(0).getValue("a").stringValue()).isEqualTo("foo.bar");
 
 		// match with i and q flag
-		query = "SELECT ?a WHERE { "
-				+ "VALUES ?a { \"foo.bar\" \"FOO.BAR\" \"foo bar\" } \n"
+		query = "SELECT ?a WHERE { " + "VALUES ?a { \"foo.bar\" \"FOO.BAR\" \"foo bar\" } \n"
 				+ "FILTER REGEX(str(?a), \"foo.bar\", \"iq\")}";
 
 		pq = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, query, null);
 
-		result = strategy.evaluate(pq.getTupleExpr(),
-				new EmptyBindingSet());
+		result = strategy.evaluate(pq.getTupleExpr(), new EmptyBindingSet());
 
 		bindingSets = QueryResults.asList(result);
 		assertThat(bindingSets).hasSize(2);
@@ -145,19 +143,15 @@ public class StrictEvaluationStrategyTest {
 
 	@Test
 	public void testComplex() {
-		String query = "PREFIX dcat: <http://www.w3.org/ns/dcat#>\n" +
-				"PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\n" +
-				"PREFIX dct: <http://purl.org/dc/terms/>\n" +
+		String query = "PREFIX dcat: <http://www.w3.org/ns/dcat#>\n" + "PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\n"
+				+ "PREFIX dct: <http://purl.org/dc/terms/>\n" +
 
-				"SELECT ?type1 ?type2 ?language ?mbox where {\n" +
-				"        ?b dcat:dataset ?a.\n" +
+				"SELECT ?type1 ?type2 ?language ?mbox where {\n" + "        ?b dcat:dataset ?a.\n" +
 
 				"        ?b a ?type1." +
 
-				"        ?a a ?type2." +
-				"        ?a dct:identifier ?identifier." +
-				"        ?a dct:language ?language." +
-				"        ?a dct:publisher [foaf:mbox ?mbox] .}";
+				"        ?a a ?type2." + "        ?a dct:identifier ?identifier." + "        ?a dct:language ?language."
+				+ "        ?a dct:publisher [foaf:mbox ?mbox] .}";
 		ParsedQuery pq = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, query, null);
 		QueryEvaluationStep prepared = strategy.precompile(pq.getTupleExpr());
 		assertNotNull(prepared);
@@ -181,6 +175,46 @@ public class StrictEvaluationStrategyTest {
 			assertTrue(nowValue.isLiteral());
 			Literal nowLiteral = (Literal) nowValue;
 			assertEquals(CoreDatatype.XSD.DATETIME, nowLiteral.getCoreDatatype());
+		}
+	}
+
+	@Test
+	public void testDatetimeCast() {
+		String query = "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> SELECT (xsd:date(\"2022-09-xx\") AS ?date) { }";
+		ParsedQuery pq = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, query, null);
+		QueryEvaluationStep prepared = strategy.precompile(pq.getTupleExpr());
+		assertNotNull(prepared);
+		try (CloseableIteration<BindingSet, QueryEvaluationException> result = prepared
+				.evaluate(EmptyBindingSet.getInstance())) {
+			assertNotNull(result);
+			assertTrue(result.hasNext());
+			assertFalse("There should be no binding because the cast should have failed.",
+					result.next().hasBinding("date"));
+			assertFalse(result.hasNext());
+		}
+	}
+
+	@Test
+	public void testSES1991NOWEvaluation() throws Exception {
+		String query = "PREFIX ex:<http://example.org> SELECT ?d WHERE {VALUES(?s ?p ?o) {(ex:type rdf:type ex:type)(ex:type ex:type ex:type)} . BIND(NOW() as ?d) } LIMIT 2";
+		ParsedQuery pq = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, query, null);
+		QueryEvaluationStep prepared = strategy.precompile(pq.getTupleExpr());
+
+		try (CloseableIteration<BindingSet, QueryEvaluationException> result = prepared
+				.evaluate(EmptyBindingSet.getInstance())) {
+			assertNotNull(result);
+			assertTrue(result.hasNext());
+
+			Literal d1 = (Literal) result.next().getValue("d");
+			assertTrue(result.hasNext());
+			Literal d2 = (Literal) result.next().getValue("d");
+			assertFalse(result.hasNext());
+			assertNotNull(d1);
+			assertEquals(d1, d2);
+			assertTrue(d1 == d2);
+		} catch (QueryEvaluationException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 }

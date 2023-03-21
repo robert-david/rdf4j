@@ -253,14 +253,14 @@ public class ShaclSail extends ShaclSailBaseConfiguration {
 		return new RevivableExecutorService(
 				() -> Executors.newFixedThreadPool(AVAILABLE_PROCESSORS,
 						r -> {
-			Thread t = Executors.defaultThreadFactory().newThread(r);
-			// this thread pool does not need to stick around if the all other threads are done, because
-			// it is only used for SHACL validation and if all other threads have ended then there would
-			// be no thread to receive the validation results.
-			t.setDaemon(true);
-			t.setName("ShaclSail validation thread " + t.getId());
-			return t;
-		}));
+							Thread t = Executors.defaultThreadFactory().newThread(r);
+							// this thread pool does not need to stick around if the all other threads are done, because
+							// it is only used for SHACL validation and if all other threads have ended then there would
+							// be no thread to receive the validation results.
+							t.setDaemon(true);
+							t.setName("ShaclSail validation thread " + t.getId());
+							return t;
+						}));
 	}
 
 	void closeConnection() {
@@ -370,10 +370,10 @@ public class ShaclSail extends ShaclSailBaseConfiguration {
 		cachedShapes = new StampedLockManager.Cache<>(new StampedLockManager(), () -> {
 			IRI[] shapesGraphs = getShapesGraphs().stream()
 					.map(g -> {
-				if (g.equals(RDF4J.NIL)) {
-					return null;
-				}
-				return g;
+						if (g.equals(RDF4J.NIL)) {
+							return null;
+						}
+						return g;
 					})
 					.toArray(IRI[]::new);
 

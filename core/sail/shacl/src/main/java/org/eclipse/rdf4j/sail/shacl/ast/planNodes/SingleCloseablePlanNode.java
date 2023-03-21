@@ -26,8 +26,9 @@ public class SingleCloseablePlanNode implements PlanNode {
 
 	private final PlanNode parent;
 
-	public SingleCloseablePlanNode(PlanNode parent) {
+	public SingleCloseablePlanNode(PlanNode parent, ValidationExecutionLogger validationExecutionLogger) {
 		this.parent = PlanNodeHelper.handleSorting(this, parent);
+		this.receiveLogger(validationExecutionLogger);
 	}
 
 	@Override

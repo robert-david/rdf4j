@@ -32,6 +32,7 @@ import org.eclipse.rdf4j.common.transaction.IsolationLevel;
 import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.common.transaction.TransactionSetting;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Namespace;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -1080,7 +1081,7 @@ public class ShaclSailConnection extends NotifyingSailConnectionWrapper implemen
 		return 0;
 	}
 
-	private class ValidationContainer {
+	public class ValidationContainer {
 		private final Shape shape;
 		private final PlanNode planNode;
 		private final ValidationExecutionLogger validationExecutionLogger;
@@ -1090,9 +1091,7 @@ public class ShaclSailConnection extends NotifyingSailConnectionWrapper implemen
 			this.validationExecutionLogger = ValidationExecutionLogger
 					.getInstance(sail.isGlobalLogValidationExecution());
 			if (!(planNode instanceof EmptyNode)) {
-				this.planNode = new SingleCloseablePlanNode(planNode);
-				this.planNode.receiveLogger(validationExecutionLogger);
-
+				this.planNode = new SingleCloseablePlanNode(planNode, validationExecutionLogger);
 			} else {
 				this.planNode = planNode;
 			}

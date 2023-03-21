@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.shacl.ast;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
 
@@ -22,6 +23,22 @@ public enum Severity {
 
 	Severity(Value iri) {
 		this.iri = iri;
+	}
+
+	public static Severity fromIri(IRI iri) {
+		if (iri == null)
+			return Severity.Violation;
+
+		for (Severity severity : Severity.values()) {
+			if (severity.iri == iri)
+				return severity;
+		}
+		for (Severity severity : Severity.values()) {
+			if (severity.iri.equals(iri))
+				return severity;
+		}
+
+		return Severity.Violation;
 	}
 
 	public Value getIri() {

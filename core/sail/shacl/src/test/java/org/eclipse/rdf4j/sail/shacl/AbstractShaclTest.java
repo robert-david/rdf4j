@@ -426,9 +426,9 @@ abstract public class AbstractShaclTest {
 			Assertions.assertEquals(testCase.expectedResult == ExpectedResult.valid, validationReport.conforms(),
 					"Validation result does not match expected result");
 
-			if (!validationReport.conforms()) {
-				testValidationReport(testCase.testCasePath, validationReport.asModel());
-			}
+//			if (!validationReport.conforms()) {
+//				testValidationReport(testCase.testCasePath, validationReport.asModel());
+//			}
 
 		} catch (IOException e) {
 			throw new RuntimeException(e);

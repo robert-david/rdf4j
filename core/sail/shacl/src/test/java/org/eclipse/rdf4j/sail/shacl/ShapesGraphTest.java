@@ -179,7 +179,7 @@ public class ShapesGraphTest {
 			connection.begin();
 			connection.addStatement(Values.bnode(), RDF.TYPE, FOAF.PERSON, data1);
 
-			connection.prepareValidation();
+			connection.prepareValidation(new ValidationSettings());
 
 			try (ConnectionsGroup connectionsGroup = connection.getConnectionsGroup()) {
 

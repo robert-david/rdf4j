@@ -45,7 +45,7 @@ public class ReduceNumberOfPlansTest {
 		try (ShaclSailConnection connection = (ShaclSailConnection) shaclSail.getConnection()) {
 			connection.begin();
 
-			connection.prepareValidation();
+			connection.prepareValidation(new ValidationSettings());
 
 			try (ConnectionsGroup connectionsGroup = connection.getConnectionsGroup()) {
 
@@ -62,7 +62,7 @@ public class ReduceNumberOfPlansTest {
 			IRI person1 = Utils.Ex.createIri();
 			connection.addStatement(person1, RDF.TYPE, Utils.Ex.Person);
 
-			connection.prepareValidation();
+			connection.prepareValidation(new ValidationSettings());
 
 			try (ConnectionsGroup connectionsGroup = connection.getConnectionsGroup()) {
 
@@ -115,7 +115,7 @@ public class ReduceNumberOfPlansTest {
 
 			connection.removeStatements(person1, Utils.Ex.ssn, vf.createLiteral("b"));
 
-			connection.prepareValidation();
+			connection.prepareValidation(new ValidationSettings());
 
 			try (ConnectionsGroup connectionsGroup = connection.getConnectionsGroup()) {
 
@@ -132,7 +132,7 @@ public class ReduceNumberOfPlansTest {
 
 			connection.removeStatements(person1, Utils.Ex.ssn, vf.createLiteral("a"));
 
-			connection.prepareValidation();
+			connection.prepareValidation(new ValidationSettings());
 
 			try (ConnectionsGroup connectionsGroup = connection.getConnectionsGroup()) {
 
@@ -148,7 +148,7 @@ public class ReduceNumberOfPlansTest {
 			}
 			connection.removeStatements(person1, Utils.Ex.name, vf.createLiteral("c"));
 
-			connection.prepareValidation();
+			connection.prepareValidation(new ValidationSettings());
 
 			try (ConnectionsGroup connectionsGroup = connection.getConnectionsGroup()) {
 

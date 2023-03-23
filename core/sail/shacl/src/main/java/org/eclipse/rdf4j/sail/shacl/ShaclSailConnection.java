@@ -32,7 +32,6 @@ import org.eclipse.rdf4j.common.transaction.IsolationLevel;
 import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.common.transaction.TransactionSetting;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Namespace;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -483,12 +482,12 @@ public class ShaclSailConnection extends NotifyingSailConnectionWrapper implemen
 
 	}
 
-	void prepareValidation() throws InterruptedException {
+	void prepareValidation(ValidationSettings validationSettings) throws InterruptedException {
 
 		assert isValidationEnabled();
 
 		if (sail.isRdfsSubClassReasoning()) {
-			rdfsSubClassOfReasoner = RdfsSubClassOfReasoner.createReasoner(this);
+			rdfsSubClassOfReasoner = RdfsSubClassOfReasoner.createReasoner(this, validationSettings);
 		}
 
 		if (!isBulkValidation()) {
@@ -865,7 +864,8 @@ public class ShaclSailConnection extends NotifyingSailConnectionWrapper implemen
 
 			stats.setEmptyIncludingCurrentTransaction(ConnectionHelper.isEmpty(this));
 
-			prepareValidation();
+			prepareValidation(
+					new ValidationSettings(null, sail.isLogValidationPlans(), false, sail.isPerformanceLogging()));
 
 			ValidationReport invalidTuples = null;
 			if (useSerializableValidation) {

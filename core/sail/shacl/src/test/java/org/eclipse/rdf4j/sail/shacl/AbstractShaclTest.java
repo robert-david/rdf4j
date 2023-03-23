@@ -390,6 +390,58 @@ abstract public class AbstractShaclTest {
 
 	}
 
+	void runWithShaclValidator(TestCase testCase) {
+
+		SailRepository shapesRepo = new SailRepository(new MemoryStore());
+		SailRepository dataRepo = new SailRepository(new MemoryStore());
+
+		try {
+
+			Utils.loadShapeData(shapesRepo, testCase.getShacl());
+			if (testCase.hasInitialData()) {
+				Utils.loadInitialData(shapesRepo, testCase.getInitialData());
+			}
+
+			for (File queryFile : testCase.getQueries()) {
+				try {
+					String query = FileUtils.readFileToString(queryFile, StandardCharsets.UTF_8);
+
+					logger.debug(queryFile.getName());
+
+					try (SailRepositoryConnection connection = dataRepo.getConnection()) {
+						connection.prepareUpdate(query).execute();
+					} catch (MalformedQueryException e) {
+						System.err.println(query + "\n");
+						throw e;
+					}
+
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+
+			ValidationReport validationReport = ShaclValidator.validate(shapesRepo, dataRepo);
+
+			Assertions.assertEquals(testCase.expectedResult == ExpectedResult.valid, validationReport.conforms(),
+					"Validation result does not match expected result");
+
+			if (!validationReport.conforms()) {
+				testValidationReport(testCase.testCasePath, validationReport.asModel());
+			}
+
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				shapesRepo.shutDown();
+			} finally {
+				dataRepo.shutDown();
+			}
+		}
+
+	}
+
 	private static void testValidationReport(String dataPath, Model validationReportActual) {
 		try {
 			InputStream resourceAsStream = getResourceAsStream(dataPath + "report.ttl");

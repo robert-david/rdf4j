@@ -31,7 +31,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDF4J;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.sail.SailConnection;
-import org.eclipse.rdf4j.sail.shacl.ShaclSailConnection;
 import org.eclipse.rdf4j.sail.shacl.ValidationSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +152,11 @@ public class RdfsSubClassOfReasoner {
 
 	public static RdfsSubClassOfReasoner createReasoner(SailConnection sailConnection,
 			ValidationSettings validationSettings) {
+		return createReasoner(sailConnection, null, validationSettings);
+	}
+
+	public static RdfsSubClassOfReasoner createReasoner(SailConnection sailConnection, SailConnection secondConnection,
+			ValidationSettings validationSettings) {
 		long before = 0;
 		if (validationSettings.isPerformanceLogging()) {
 			before = System.currentTimeMillis();
@@ -165,10 +169,25 @@ public class RdfsSubClassOfReasoner {
 			stream.forEach(rdfsSubClassOfReasoner::addSubClassOfStatement);
 		}
 
+		if (secondConnection != null) {
+			try (Stream<? extends Statement> stream = secondConnection.getStatements(null, RDFS.SUBCLASSOF, null, false)
+					.stream()) {
+				stream.forEach(rdfsSubClassOfReasoner::addSubClassOfStatement);
+			}
+		}
+
 		try (Stream<? extends Statement> stream = sailConnection
 				.getStatements(null, RDFS.SUBCLASSOF, null, false, RDF4J.SHACL_SHAPE_GRAPH)
 				.stream()) {
 			stream.forEach(rdfsSubClassOfReasoner::addSubClassOfStatement);
+		}
+
+		if (secondConnection != null) {
+			try (Stream<? extends Statement> stream = secondConnection
+					.getStatements(null, RDFS.SUBCLASSOF, null, false, RDF4J.SHACL_SHAPE_GRAPH)
+					.stream()) {
+				stream.forEach(rdfsSubClassOfReasoner::addSubClassOfStatement);
+			}
 		}
 
 		rdfsSubClassOfReasoner.calculateSubClassOf(rdfsSubClassOfReasoner.subClassOfStatements);

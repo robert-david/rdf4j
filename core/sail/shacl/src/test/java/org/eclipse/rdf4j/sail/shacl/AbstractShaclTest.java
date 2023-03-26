@@ -399,7 +399,7 @@ abstract public class AbstractShaclTest {
 
 			Utils.loadShapeData(shapesRepo, testCase.getShacl());
 			if (testCase.hasInitialData()) {
-				Utils.loadInitialData(shapesRepo, testCase.getInitialData());
+				Utils.loadInitialData(dataRepo, testCase.getInitialData());
 			}
 
 			for (File queryFile : testCase.getQueries()) {

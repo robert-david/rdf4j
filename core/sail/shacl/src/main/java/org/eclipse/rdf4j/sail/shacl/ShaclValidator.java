@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.vocabulary.RDF4J;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
 import org.eclipse.rdf4j.sail.SailException;
@@ -33,16 +31,18 @@ import org.eclipse.rdf4j.sail.shacl.results.lazy.ValidationResultIterator;
 import org.eclipse.rdf4j.sail.shacl.wrapper.data.ConnectionsGroup;
 import org.eclipse.rdf4j.sail.shacl.wrapper.data.RdfsSubClassOfReasoner;
 import org.eclipse.rdf4j.sail.shacl.wrapper.data.VerySimpleRdfsBackwardsChainingConnection;
-import org.eclipse.rdf4j.sail.shacl.wrapper.shape.ForwardChainingShapeSource;
+import org.eclipse.rdf4j.sail.shacl.wrapper.shape.CombinedShapeSource;
+import org.eclipse.rdf4j.sail.shacl.wrapper.shape.ShapeSource;
 
 public class ShaclValidator {
 
 	public static ValidationReport validate(SailRepository shapesRepo, SailRepository dataRepo) {
 
 		List<ContextWithShapes> shapes;
-		try (RepositoryConnection shapesConnection = shapesRepo.getConnection()) {
+		try (SailRepositoryConnection shapesConnection = shapesRepo.getConnection()) {
 			shapesConnection.begin(IsolationLevels.NONE);
-			try (ForwardChainingShapeSource shapeSource = new ForwardChainingShapeSource(shapesConnection)) {
+			try (ShapeSource shapeSource = new CombinedShapeSource(shapesConnection,
+					shapesConnection.getSailConnection())) {
 				shapes = Shape.Factory.getShapes(shapeSource.withContext(new Resource[] {}),
 						new Shape.ParseSettings(true, true));
 			}
@@ -50,9 +50,14 @@ public class ShaclValidator {
 		}
 
 		try (SailRepositoryConnection dataRepoConnection = dataRepo.getConnection()) {
-			RdfsSubClassOfReasoner reasoner = RdfsSubClassOfReasoner.createReasoner(
-					dataRepoConnection.getSailConnection(),
-					new ValidationSettings(new Resource[] { null }, false, true, false));
+
+			RdfsSubClassOfReasoner reasoner;
+
+			try (SailRepositoryConnection shapesConnection = shapesRepo.getConnection()) {
+				reasoner = RdfsSubClassOfReasoner.createReasoner(
+						dataRepoConnection.getSailConnection(), shapesConnection.getSailConnection(),
+						new ValidationSettings(new Resource[] { null }, false, true, false));
+			}
 
 			VerySimpleRdfsBackwardsChainingConnection verySimpleRdfsBackwardsChainingConnection = new VerySimpleRdfsBackwardsChainingConnection(
 					dataRepoConnection.getSailConnection(), reasoner);

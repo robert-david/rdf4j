@@ -36,6 +36,8 @@ import org.eclipse.rdf4j.sail.shacl.wrapper.shape.ShapeSource;
 
 public class ShaclValidator {
 
+	public static final Resource[] ALL_CONTEXTS = {};
+
 	public static ValidationReport validate(SailRepository shapesRepo, SailRepository dataRepo) {
 
 		List<ContextWithShapes> shapes;
@@ -43,7 +45,7 @@ public class ShaclValidator {
 			shapesConnection.begin(IsolationLevels.NONE);
 			try (ShapeSource shapeSource = new CombinedShapeSource(shapesConnection,
 					shapesConnection.getSailConnection())) {
-				shapes = Shape.Factory.getShapes(shapeSource.withContext(new Resource[] {}),
+				shapes = Shape.Factory.getShapes(shapeSource.withContext(ALL_CONTEXTS),
 						new Shape.ParseSettings(true, true));
 			}
 			shapesConnection.commit();
@@ -56,7 +58,7 @@ public class ShaclValidator {
 			try (SailRepositoryConnection shapesConnection = shapesRepo.getConnection()) {
 				reasoner = RdfsSubClassOfReasoner.createReasoner(
 						dataRepoConnection.getSailConnection(), shapesConnection.getSailConnection(),
-						new ValidationSettings(new Resource[] { null }, false, true, false));
+						new ValidationSettings(ALL_CONTEXTS, false, true, false));
 			}
 
 			VerySimpleRdfsBackwardsChainingConnection verySimpleRdfsBackwardsChainingConnection = new VerySimpleRdfsBackwardsChainingConnection(
@@ -78,7 +80,7 @@ public class ShaclValidator {
 						.getShapes()
 						.stream()
 						.map(shape -> shape.generatePlans(connectionsGroup,
-								new ValidationSettings(new Resource[] { null }, false, true, false)))
+								new ValidationSettings(contextWithShapes.getDataGraph(), false, true, false)))
 				)
 				.map(planNode -> {
 					planNode = new SingleCloseablePlanNode(planNode, ValidationExecutionLogger.getInstance(false));

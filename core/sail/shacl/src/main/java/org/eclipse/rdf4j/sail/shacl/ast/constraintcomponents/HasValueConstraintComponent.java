@@ -36,7 +36,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.targets.EffectiveTarget;
 
 public class HasValueConstraintComponent extends AbstractConstraintComponent {
 
-	Value hasValue;
+	private Value hasValue;
 
 	public HasValueConstraintComponent(Value hasValue) {
 		this.hasValue = hasValue;
@@ -246,5 +246,9 @@ public class HasValueConstraintComponent extends AbstractConstraintComponent {
 	@Override
 	public ValidationApproach getOptimalBulkValidationApproach() {
 		return ValidationApproach.SPARQL;
+	}
+
+	public Value getHasValue() {
+		return hasValue;
 	}
 }

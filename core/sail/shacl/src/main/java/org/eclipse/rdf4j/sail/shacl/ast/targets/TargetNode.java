@@ -143,4 +143,8 @@ public class TargetNode extends Target {
 	public int hashCode() {
 		return Objects.hash(targetNodes);
 	}
+
+	public Set<Value> getTargetNodes() {
+		return targetNodes;
+	}
 }

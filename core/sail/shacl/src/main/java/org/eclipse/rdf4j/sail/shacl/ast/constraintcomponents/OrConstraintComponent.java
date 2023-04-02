@@ -35,7 +35,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.planNodes.Unique;
 import org.eclipse.rdf4j.sail.shacl.ast.targets.TargetChain;
 
 public class OrConstraintComponent extends LogicalOperatorConstraintComponent {
-	List<Shape> or;
+	private List<Shape> or;
 
 	public OrConstraintComponent(Resource id, RepositoryConnection connection,
 			Cache cache, ShaclSail shaclSail) {

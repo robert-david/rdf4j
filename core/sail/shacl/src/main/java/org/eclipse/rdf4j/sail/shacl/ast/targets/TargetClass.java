@@ -180,4 +180,8 @@ public class TargetClass extends Target {
 	public int hashCode() {
 		return Objects.hash(targetClass);
 	}
+
+	public Set<Resource> getTargetClass() {
+		return targetClass;
+	}
 }

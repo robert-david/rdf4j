@@ -75,4 +75,8 @@ public class InversePath extends Path {
 				stableRandomVariableProvider);
 
 	}
+
+	public Path getInversePath() {
+		return inversePath;
+	}
 }

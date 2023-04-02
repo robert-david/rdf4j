@@ -443,6 +443,22 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 
 	}
 
+	public List<Target> getTarget() {
+		return target;
+	}
+
+	public void setTarget(List<Target> target) {
+		this.target = target;
+	}
+
+	public List<ConstraintComponent> getConstraintComponents() {
+		return constraintComponents;
+	}
+
+	public void setConstraintComponents(List<ConstraintComponent> constraintComponents) {
+		this.constraintComponents = constraintComponents;
+	}
+
 	public static class Factory {
 
 		public static List<Shape> getShapes(RepositoryConnection connection, ShaclSail shaclSail) {
@@ -499,7 +515,7 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 			}).collect(Collectors.toList());
 		}
 
-		private static List<Shape> parse(RepositoryConnection connection, ShaclSail shaclSail) {
+		public static List<Shape> parse(RepositoryConnection connection, ShaclSail shaclSail) {
 			Cache cache = new Cache();
 
 			Set<Resource> resources = getTargetableShapes(connection);

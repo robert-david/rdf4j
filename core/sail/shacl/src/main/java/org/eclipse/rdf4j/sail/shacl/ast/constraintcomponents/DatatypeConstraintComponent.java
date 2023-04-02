@@ -14,7 +14,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.planNodes.PlanNode;
 
 public class DatatypeConstraintComponent extends SimpleAbstractConstraintComponent {
 
-	IRI datatype;
+	private IRI datatype;
 
 	public DatatypeConstraintComponent(IRI datatype) {
 		this.datatype = datatype;
@@ -49,4 +49,7 @@ public class DatatypeConstraintComponent extends SimpleAbstractConstraintCompone
 		}
 	}
 
+	public IRI getDatatype() {
+		return datatype;
+	}
 }

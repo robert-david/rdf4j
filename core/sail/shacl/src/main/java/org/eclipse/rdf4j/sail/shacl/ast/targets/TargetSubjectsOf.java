@@ -138,4 +138,8 @@ public class TargetSubjectsOf extends Target {
 	public int hashCode() {
 		return Objects.hash(targetSubjectsOf);
 	}
+
+	public Set<IRI> getTargetSubjectsOf() {
+		return targetSubjectsOf;
+	}
 }

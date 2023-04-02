@@ -73,4 +73,7 @@ public class SequencePath extends Path {
 		throw new ShaclUnsupportedException();
 	}
 
+	public List<Path> getSequence() {
+		return sequence;
+	}
 }

@@ -40,9 +40,9 @@ import org.eclipse.rdf4j.sail.shacl.ast.targets.EffectiveTarget;
 import org.eclipse.rdf4j.sail.shacl.ast.targets.TargetChain;
 
 public class QualifiedMinCountConstraintComponent extends AbstractConstraintComponent {
-	Shape qualifiedValueShape;
+	private Shape qualifiedValueShape;
 	Boolean qualifiedValueShapesDisjoint;
-	Long qualifiedMinCount;
+	private Long qualifiedMinCount;
 
 	public QualifiedMinCountConstraintComponent(Resource id, RepositoryConnection connection,
 			Cache cache, ShaclSail shaclSail, Boolean qualifiedValueShapesDisjoint, Long qualifiedMinCount) {
@@ -238,4 +238,11 @@ public class QualifiedMinCountConstraintComponent extends AbstractConstraintComp
 		return true;
 	}
 
+	public Long getQualifiedMinCount() {
+		return qualifiedMinCount;
+	}
+
+	public Shape getQualifiedValueShape() {
+		return qualifiedValueShape;
+	}
 }

@@ -27,7 +27,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.targets.EffectiveTarget;
 import org.eclipse.rdf4j.sail.shacl.ast.targets.TargetChain;
 
 public class NotConstraintComponent extends AbstractConstraintComponent {
-	Shape not;
+	private Shape not;
 
 	public NotConstraintComponent(Resource id, RepositoryConnection connection,
 			Cache cache, ShaclSail shaclSail) {
@@ -174,5 +174,13 @@ public class NotConstraintComponent extends AbstractConstraintComponent {
 	@Override
 	public boolean requiresEvaluation(ConnectionsGroup connectionsGroup, Scope scope) {
 		return not.requiresEvaluation(connectionsGroup, scope);
+	}
+
+	public Shape getNot() {
+		return not;
+	}
+
+	public void setNot(Shape not) {
+		this.not = not;
 	}
 }

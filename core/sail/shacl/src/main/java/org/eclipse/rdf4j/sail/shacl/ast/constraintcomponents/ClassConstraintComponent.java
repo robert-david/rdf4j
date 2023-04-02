@@ -31,7 +31,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.targets.EffectiveTarget;
 
 public class ClassConstraintComponent extends AbstractConstraintComponent {
 
-	IRI clazz;
+	private IRI clazz;
 
 	public ClassConstraintComponent(IRI clazz) {
 		this.clazz = clazz;
@@ -297,5 +297,9 @@ public class ClassConstraintComponent extends AbstractConstraintComponent {
 	@Override
 	public ValidationApproach getOptimalBulkValidationApproach() {
 		return ValidationApproach.SPARQL;
+	}
+
+	public IRI getConstraintClass() {
+		return clazz;
 	}
 }

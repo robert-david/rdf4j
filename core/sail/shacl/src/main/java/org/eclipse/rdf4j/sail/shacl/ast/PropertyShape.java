@@ -66,7 +66,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 			shape.populate(properties, connection, cache, shaclSail);
 		}
 
-		if (shape.constraintComponents.isEmpty()) {
+		if (shape.getConstraintComponents().isEmpty()) {
 			shape.deactivated = true;
 		}
 
@@ -84,7 +84,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 			throw new IllegalStateException(properties.getId() + " is a sh:PropertyShape without a sh:path!");
 		}
 
-		constraintComponents = getConstraintComponents(properties, connection, cache, shaclSail);
+		setConstraintComponents(getConstraintComponents(properties, connection, cache, shaclSail));
 	}
 
 	@Override
@@ -114,7 +114,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 		}
 		cycleDetection.add(getId());
 
-		constraintComponents.forEach(c -> c.toModel(getId(), null, model, cycleDetection));
+		getConstraintComponents().forEach(c -> c.toModel(getId(), null, model, cycleDetection));
 
 	}
 
@@ -131,7 +131,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 			return ValidationQuery.Deactivated.getInstance();
 		}
 
-		ValidationQuery validationQuery = constraintComponents.stream()
+		ValidationQuery validationQuery = getConstraintComponents().stream()
 				.map(c -> {
 					ValidationQuery validationQuery1 = c.generateSparqlValidationQuery(connectionsGroup,
 							logValidationPlans, negatePlan,
@@ -147,7 +147,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 		// since we split our shapes by constraint component we know that we will only have 1 constraint component
 		// unless we are within a logical operator like sh:not, in which case we don't need to create a validation
 		// report since sh:detail is not supported for sparql based validation
-		if (constraintComponents.size() == 1 && !(constraintComponents.get(0) instanceof PropertyShape)) {
+		if (getConstraintComponents().size() == 1 && !(getConstraintComponents().get(0) instanceof PropertyShape)) {
 			validationQuery.withShape(this);
 			validationQuery.withSeverity(getSeverity());
 			validationQuery.makeCurrentStateValidationReport();
@@ -200,7 +200,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 //
 //		}
 
-		for (ConstraintComponent constraintComponent : constraintComponents) {
+		for (ConstraintComponent constraintComponent : getConstraintComponents()) {
 			if (!getPath().isSupported()) {
 				logger.error("Unsupported path detected. Shape ignored! \n" + this.toString());
 				continue;
@@ -231,7 +231,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 
 	@Override
 	public PlanNode getAllTargetsPlan(ConnectionsGroup connectionsGroup, Scope scope) {
-		PlanNode planNode = constraintComponents.stream()
+		PlanNode planNode = getConstraintComponents().stream()
 				.map(c -> c.getAllTargetsPlan(connectionsGroup, Scope.propertyShape))
 				.distinct()
 				.reduce(UnionNode::getInstanceDedupe)
@@ -256,7 +256,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 
 	@Override
 	public ValidationApproach getPreferredValidationApproach(ConnectionsGroup connectionsGroup) {
-		return constraintComponents.stream()
+		return getConstraintComponents().stream()
 				.map(constraintComponent -> constraintComponent.getPreferredValidationApproach(connectionsGroup))
 				.reduce(ValidationApproach::reducePreferred)
 				.orElse(ValidationApproach.MOST_COMPATIBLE);
@@ -270,9 +270,9 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 	public ConstraintComponent deepClone() {
 		PropertyShape nodeShape = new PropertyShape(this);
 
-		nodeShape.constraintComponents = constraintComponents.stream()
+		nodeShape.setConstraintComponents(getConstraintComponents().stream()
 				.map(ConstraintComponent::deepClone)
-				.collect(Collectors.toList());
+				.collect(Collectors.toList()));
 
 		return nodeShape;
 	}
@@ -283,7 +283,7 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 			RdfsSubClassOfReasoner rdfsSubClassOfReasoner, Scope scope,
 			StatementMatcher.StableRandomVariableProvider stableRandomVariableProvider) {
 
-		List<SparqlFragment> sparqlFragments = constraintComponents.stream()
+		List<SparqlFragment> sparqlFragments = getConstraintComponents().stream()
 				.map(shape -> shape.buildSparqlValidNodes_rsx_targetShape(object,
 						stableRandomVariableProvider.next(), rdfsSubClassOfReasoner, Scope.propertyShape,
 						stableRandomVariableProvider))

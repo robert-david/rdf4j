@@ -45,9 +45,9 @@ import org.eclipse.rdf4j.sail.shacl.ast.targets.EffectiveTarget;
 import org.eclipse.rdf4j.sail.shacl.ast.targets.TargetChain;
 
 public class QualifiedMaxCountConstraintComponent extends AbstractConstraintComponent {
-	Shape qualifiedValueShape;
+	private Shape qualifiedValueShape;
 	Boolean qualifiedValueShapesDisjoint;
-	Long qualifiedMaxCount;
+	private Long qualifiedMaxCount;
 
 	public QualifiedMaxCountConstraintComponent(Resource id, RepositoryConnection connection,
 			Cache cache, ShaclSail shaclSail, Boolean qualifiedValueShapesDisjoint, Long qualifiedMaxCount) {
@@ -232,5 +232,13 @@ public class QualifiedMaxCountConstraintComponent extends AbstractConstraintComp
 	@Override
 	public boolean requiresEvaluation(ConnectionsGroup connectionsGroup, Scope scope) {
 		return true;
+	}
+
+	public Long getQualifiedMaxCount() {
+		return qualifiedMaxCount;
+	}
+
+	public Shape getQualifiedValueShape() {
+		return qualifiedValueShape;
 	}
 }

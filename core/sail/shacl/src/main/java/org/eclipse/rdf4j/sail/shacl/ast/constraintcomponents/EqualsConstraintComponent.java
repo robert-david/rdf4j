@@ -10,7 +10,7 @@ import org.eclipse.rdf4j.sail.shacl.SourceConstraintComponent;
 
 public class EqualsConstraintComponent extends AbstractConstraintComponent {
 
-	IRI predicate;
+	private IRI predicate;
 
 	public EqualsConstraintComponent(IRI predicate) {
 		this.predicate = predicate;
@@ -29,5 +29,9 @@ public class EqualsConstraintComponent extends AbstractConstraintComponent {
 	@Override
 	public ConstraintComponent deepClone() {
 		return new EqualsConstraintComponent(predicate);
+	}
+
+	public IRI getPredicate() {
+		return predicate;
 	}
 }

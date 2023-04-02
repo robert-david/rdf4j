@@ -34,7 +34,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.targets.EffectiveTarget;
 
 public class MaxCountConstraintComponent extends AbstractConstraintComponent {
 
-	long maxCount;
+	private long maxCount;
 
 	public MaxCountConstraintComponent(long maxCount) {
 		this.maxCount = maxCount;
@@ -193,5 +193,9 @@ public class MaxCountConstraintComponent extends AbstractConstraintComponent {
 			return ValidationApproach.Transactional;
 		}
 		return ValidationApproach.SPARQL;
+	}
+
+	public long getMaxCount() {
+		return maxCount;
 	}
 }

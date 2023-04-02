@@ -78,7 +78,7 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 		 * Also not supported here is: - sh:lessThan - sh:lessThanOrEquals - sh:qualifiedValueShape
 		 */
 
-		constraintComponents = getConstraintComponents(properties, connection, cache, shaclSail);
+		setConstraintComponents(getConstraintComponents(properties, connection, cache, shaclSail));
 
 	}
 
@@ -106,7 +106,7 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 		}
 		cycleDetection.add(getId());
 
-		constraintComponents.forEach(c -> c.toModel(getId(), null, model, cycleDetection));
+		getConstraintComponents().forEach(c -> c.toModel(getId(), null, model, cycleDetection));
 
 	}
 
@@ -118,7 +118,7 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 			return ValidationQuery.Deactivated.getInstance();
 		}
 
-		ValidationQuery validationQuery = constraintComponents.stream()
+		ValidationQuery validationQuery = getConstraintComponents().stream()
 				.map(c -> {
 					ValidationQuery validationQuery1 = c.generateSparqlValidationQuery(connectionsGroup,
 							logValidationPlans, negatePlan,
@@ -135,8 +135,8 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 			// since we split our shapes by constraint component we know that we will only have 1 constraint component
 			// unless we are within a logical operator like sh:not, in which case we don't need to create a validation
 			// report since sh:detail is not supported for sparql based validation
-			assert constraintComponents.size() == 1;
-			if (!(constraintComponents.get(0) instanceof PropertyShape)) {
+			assert getConstraintComponents().size() == 1;
+			if (!(getConstraintComponents().get(0) instanceof PropertyShape)) {
 				validationQuery = validationQuery.withShape(this);
 				validationQuery = validationQuery.withSeverity(severity);
 				validationQuery.makeCurrentStateValidationReport();
@@ -162,7 +162,7 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 
 		PlanNode union = EmptyNode.getInstance();
 
-		for (ConstraintComponent constraintComponent : constraintComponents) {
+		for (ConstraintComponent constraintComponent : getConstraintComponents()) {
 			PlanNode validationPlanNode = constraintComponent
 					.generateTransactionalValidationPlan(connectionsGroup, logValidationPlans, overrideTargetNode,
 							Scope.nodeShape);
@@ -187,7 +187,7 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 
 	@Override
 	public ValidationApproach getPreferredValidationApproach(ConnectionsGroup connectionsGroup) {
-		return constraintComponents.stream()
+		return getConstraintComponents().stream()
 				.map(constraintComponent -> constraintComponent.getPreferredValidationApproach(connectionsGroup))
 				.reduce(ValidationApproach::reducePreferred)
 				.orElse(ValidationApproach.Transactional);
@@ -201,7 +201,7 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 	@Override
 	public PlanNode getAllTargetsPlan(ConnectionsGroup connectionsGroup, Scope scope) {
 
-		PlanNode planNode = constraintComponents.stream()
+		PlanNode planNode = getConstraintComponents().stream()
 				.map(c -> c.getAllTargetsPlan(connectionsGroup, Scope.nodeShape))
 				.distinct()
 				.reduce(UnionNode::getInstanceDedupe)
@@ -225,9 +225,9 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 	public ConstraintComponent deepClone() {
 		NodeShape nodeShape = new NodeShape(this);
 
-		nodeShape.constraintComponents = constraintComponents.stream()
+		nodeShape.setConstraintComponents(getConstraintComponents().stream()
 				.map(ConstraintComponent::deepClone)
-				.collect(Collectors.toList());
+				.collect(Collectors.toList()));
 
 		return nodeShape;
 	}
@@ -238,7 +238,7 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 			RdfsSubClassOfReasoner rdfsSubClassOfReasoner, Scope scope,
 			StatementMatcher.StableRandomVariableProvider stableRandomVariableProvider) {
 
-		List<SparqlFragment> sparqlFragments = constraintComponents.stream()
+		List<SparqlFragment> sparqlFragments = getConstraintComponents().stream()
 				.map(shape -> shape.buildSparqlValidNodes_rsx_targetShape(subject, object, rdfsSubClassOfReasoner,
 						Scope.nodeShape, stableRandomVariableProvider))
 				.collect(Collectors.toList());

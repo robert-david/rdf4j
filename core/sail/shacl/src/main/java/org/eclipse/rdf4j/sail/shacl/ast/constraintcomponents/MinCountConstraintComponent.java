@@ -31,7 +31,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.targets.EffectiveTarget;
 
 public class MinCountConstraintComponent extends AbstractConstraintComponent {
 
-	long minCount;
+	private long minCount;
 
 	public MinCountConstraintComponent(long minCount) {
 		this.minCount = minCount;
@@ -169,5 +169,9 @@ public class MinCountConstraintComponent extends AbstractConstraintComponent {
 	@Override
 	public ValidationApproach getOptimalBulkValidationApproach() {
 		return ValidationApproach.SPARQL;
+	}
+
+	public long getMinCount() {
+		return minCount;
 	}
 }

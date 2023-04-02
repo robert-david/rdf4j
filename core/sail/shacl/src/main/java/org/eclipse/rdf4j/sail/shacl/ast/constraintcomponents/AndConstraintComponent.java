@@ -31,7 +31,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.planNodes.Unique;
 import org.eclipse.rdf4j.sail.shacl.ast.targets.TargetChain;
 
 public class AndConstraintComponent extends LogicalOperatorConstraintComponent {
-	List<Shape> and;
+	private List<Shape> and;
 
 	public AndConstraintComponent(Resource id, RepositoryConnection connection,
 			Cache cache, ShaclSail shaclSail) {
@@ -145,4 +145,7 @@ public class AndConstraintComponent extends LogicalOperatorConstraintComponent {
 
 	}
 
+	public List<Shape> getAnd() {
+		return and;
+	}
 }

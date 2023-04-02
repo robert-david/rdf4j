@@ -348,6 +348,7 @@
 							</execution>
 						</executions>
 					</plugin>
+					<!--
 					<plugin>
 						<groupId>net.revelc.code</groupId>
 						<artifactId>impsort-maven-plugin</artifactId>
@@ -359,6 +360,7 @@
 							</execution>
 						</executions>
 					</plugin>
+					-->
 					<plugin>
 						<groupId>au.com.acegi</groupId>
 						<artifactId>xml-format-maven-plugin</artifactId>
@@ -928,6 +930,7 @@
 						<skipHtmlFormatting>true</skipHtmlFormatting>
 					</configuration>
 				</plugin>
+				<!--
 				<plugin>
 					<groupId>net.revelc.code</groupId>
 					<artifactId>impsort-maven-plugin</artifactId>
@@ -937,6 +940,7 @@
 						<staticGroups>java,*</staticGroups>
 					</configuration>
 				</plugin>
+				-->
 				<plugin>
 					<groupId>org.apache.tomcat.maven</groupId>
 					<artifactId>tomcat7-maven-plugin</artifactId>

@@ -89,4 +89,7 @@ public class InConstraintComponent extends SimpleAbstractConstraintComponent {
 		return (parent) -> new ValueInFilter(parent, in);
 	}
 
+	public Set<Value> getIn() {
+		return in;
+	}
 }

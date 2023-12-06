@@ -30,4 +30,8 @@ public class LessThanOrEqualsConstraintComponent extends AbstractConstraintCompo
 	public ConstraintComponent deepClone() {
 		return new LessThanOrEqualsConstraintComponent(predicate);
 	}
+
+	public IRI getPredicate() {
+		return predicate;
+	}
 }

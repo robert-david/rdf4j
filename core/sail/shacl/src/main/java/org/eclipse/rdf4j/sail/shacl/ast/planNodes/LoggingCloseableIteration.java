@@ -1,15 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Distribution License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *******************************************************************************/
+
 package org.eclipse.rdf4j.sail.shacl.ast.planNodes;
 
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.sail.SailException;
-import org.eclipse.rdf4j.sail.shacl.GlobalValidationExecutionLogging;
 
 public abstract class LoggingCloseableIteration implements CloseableIteration<ValidationTuple, SailException> {
 
 	private final ValidationExecutionLogger validationExecutionLogger;
 	private final PlanNode planNode;
-	private boolean empty = false;
 	private boolean closed;
+	private boolean initialized;
 
 	public LoggingCloseableIteration(PlanNode planNode, ValidationExecutionLogger validationExecutionLogger) {
 		this.planNode = planNode;
@@ -18,10 +28,11 @@ public abstract class LoggingCloseableIteration implements CloseableIteration<Va
 
 	@Override
 	public final ValidationTuple next() throws SailException {
+		assert initialized;
 
 		ValidationTuple tuple = loggingNext();
 
-		if (GlobalValidationExecutionLogging.loggingEnabled) {
+		if (validationExecutionLogger.isEnabled()) {
 			validationExecutionLogger.log(planNode.depth(), planNode.getClass().getSimpleName() + ".next()", tuple,
 					planNode, planNode.getId(), null);
 		}
@@ -30,14 +41,18 @@ public abstract class LoggingCloseableIteration implements CloseableIteration<Va
 
 	@Override
 	public final boolean hasNext() throws SailException {
-		if (empty) {
+		if (closed) {
 			return false;
+		}
+
+		if (!initialized) {
+			initialized = true;
+			init();
 		}
 
 		boolean hasNext = localHasNext();
 
 		if (!hasNext) {
-			empty = true;
 			assert !localHasNext() : "Iterator was initially empty, but still has more elements! " + this.getClass();
 			close();
 		}
@@ -53,11 +68,13 @@ public abstract class LoggingCloseableIteration implements CloseableIteration<Va
 		}
 	}
 
-	protected abstract ValidationTuple loggingNext() throws SailException;
+	protected abstract void init();
 
-	protected abstract boolean localHasNext() throws SailException;
+	protected abstract ValidationTuple loggingNext();
 
-	protected abstract void localClose() throws SailException;
+	protected abstract boolean localHasNext();
+
+	protected abstract void localClose();
 
 	/**
 	 * A default method since the iterators in the ShaclSail don't support remove.
@@ -68,4 +85,9 @@ public abstract class LoggingCloseableIteration implements CloseableIteration<Va
 	public void remove() throws SailException {
 		throw new UnsupportedOperationException();
 	}
+
+	public boolean isClosed() {
+		return closed;
+	}
+
 }

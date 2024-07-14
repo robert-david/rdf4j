@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.model;
 
@@ -19,7 +22,6 @@ import java.util.UUID;
 import org.eclipse.rdf4j.common.annotation.InternalUseOnly;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.iteration.ExceptionConvertingIteration;
-import org.eclipse.rdf4j.common.iteration.Iteration;
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.common.iterator.CloseableIterationIterator;
 import org.eclipse.rdf4j.model.IRI;
@@ -41,7 +43,6 @@ import org.eclipse.rdf4j.sail.SailException;
  * Not thread-safe.
  *
  * @author Mark
- *
  * @apiNote this feature is for internal use only: its existence, signature or behavior may change without warning from
  *          one release to the next.
  */
@@ -54,7 +55,7 @@ public class SailModel extends AbstractModel {
 
 	private UUID connKey;
 
-	private boolean includeInferred;
+	private final boolean includeInferred;
 
 	public SailModel(SailConnection conn, boolean includeInferred) {
 		this.conn = conn;
@@ -210,7 +211,8 @@ public class SailModel extends AbstractModel {
 
 	private Iterator<Statement> iterator(Resource subj, IRI pred, Value obj, Resource... contexts) {
 		try {
-			Iteration<? extends Statement, ?> iter = conn.getStatements(subj, pred, obj, includeInferred, contexts);
+			CloseableIteration<? extends Statement, ?> iter = conn.getStatements(subj, pred, obj, includeInferred,
+					contexts);
 			return new CloseableIterationIterator<>(
 					new ExceptionConvertingIteration<Statement, ModelException>(iter) {
 

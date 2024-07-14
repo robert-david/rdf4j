@@ -1,21 +1,24 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.nativerdf.btree;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
 import org.eclipse.rdf4j.common.io.ByteArrayUtil;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * @author Arjohn Kampman
@@ -28,8 +31,8 @@ public class BTreeBenchmark {
 	 * Variables *
 	 *-----------*/
 
-	@Rule
-	public final TemporaryFolder tmpDir = new TemporaryFolder();
+	@TempDir
+	File tmpDir;
 
 	private BTree btree;
 
@@ -37,12 +40,12 @@ public class BTreeBenchmark {
 	 * Methods *
 	 *---------*/
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
-		btree = new BTree(tmpDir.newFolder(), "test", 4096, 8);
+		btree = new BTree(tmpDir, "test", 4096, 8);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		btree.delete();
 	}

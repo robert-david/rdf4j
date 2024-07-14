@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.nativerdf;
 
@@ -13,9 +16,9 @@ import static org.mockito.Mockito.mock;
 import java.nio.file.Files;
 import java.util.Iterator;
 
-import org.eclipse.rdf4j.model.ModelTest;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.testsuite.model.ModelTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

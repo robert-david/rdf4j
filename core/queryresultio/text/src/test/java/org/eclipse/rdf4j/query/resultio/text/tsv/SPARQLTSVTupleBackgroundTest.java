@@ -1,20 +1,24 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.query.resultio.text.tsv;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -23,14 +27,14 @@ import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
 import org.eclipse.rdf4j.query.impl.MutableTupleQueryResult;
-import org.eclipse.rdf4j.query.resultio.AbstractQueryResultIOTupleTest;
 import org.eclipse.rdf4j.query.resultio.BooleanQueryResultFormat;
 import org.eclipse.rdf4j.query.resultio.QueryResultIO;
 import org.eclipse.rdf4j.query.resultio.QueryResultParseException;
 import org.eclipse.rdf4j.query.resultio.TupleQueryResultFormat;
 import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriter;
 import org.eclipse.rdf4j.query.resultio.UnsupportedQueryResultFormatException;
-import org.junit.Test;
+import org.eclipse.rdf4j.testsuite.query.resultio.AbstractQueryResultIOTupleTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Peter Ansell
@@ -56,7 +60,7 @@ public class SPARQLTSVTupleBackgroundTest extends AbstractQueryResultIOTupleTest
 	@Override
 	protected TupleQueryResult parseTupleInternal(TupleQueryResultFormat format, InputStream in) throws IOException,
 			QueryResultParseException, TupleQueryResultHandlerException, UnsupportedQueryResultFormatException {
-		return QueryResultIO.parseTupleBackground(in, format);
+		return QueryResultIO.parseTupleBackground(in, format, null);
 	}
 
 	@Test
@@ -100,10 +104,10 @@ public class SPARQLTSVTupleBackgroundTest extends AbstractQueryResultIOTupleTest
 		TupleQueryResultWriter writer = QueryResultIO.createTupleWriter(format, out);
 		writer.startDocument();
 		writer.startHeader();
-		writer.handleLinks(Arrays.<String>asList());
+		writer.handleLinks(List.<String>of());
 		QueryResults.report(results, writer);
 
-		return out.toString("UTF-8");
+		return out.toString(StandardCharsets.UTF_8);
 	}
 
 	private void assertRegex(String pattern, String actual) {

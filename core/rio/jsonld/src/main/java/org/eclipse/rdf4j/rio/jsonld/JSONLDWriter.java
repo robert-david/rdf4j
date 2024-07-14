@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.jsonld;
 
@@ -27,7 +30,6 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.RioSetting;
 import org.eclipse.rdf4j.rio.WriterConfig;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFWriter;
@@ -47,7 +49,7 @@ import com.github.jsonldjava.utils.JsonUtils;
  *
  * @author Peter Ansell
  */
-public class JSONLDWriter extends AbstractRDFWriter implements RDFWriter, CharSink {
+public class JSONLDWriter extends AbstractRDFWriter implements CharSink {
 
 	private final Model model = new LinkedHashModel();
 
@@ -58,7 +60,7 @@ public class JSONLDWriter extends AbstractRDFWriter implements RDFWriter, CharSi
 	private final Writer writer;
 
 	/**
-	 * Create a SesameJSONLDWriter using a {@link java.io.OutputStream}
+	 * Create a JSONLDWriter using a {@link java.io.OutputStream}
 	 *
 	 * @param outputStream The OutputStream to write to.
 	 */
@@ -78,7 +80,7 @@ public class JSONLDWriter extends AbstractRDFWriter implements RDFWriter, CharSi
 	}
 
 	/**
-	 * Create a SesameJSONLDWriter using a {@link java.io.Writer}
+	 * Create a JSONLDWriter using a {@link java.io.Writer}
 	 *
 	 * @param writer The Writer to write to.
 	 */
@@ -87,7 +89,7 @@ public class JSONLDWriter extends AbstractRDFWriter implements RDFWriter, CharSi
 	}
 
 	/**
-	 * Create a SesameJSONLDWriter using a {@link java.io.Writer}
+	 * Create a JSONLDWriter using a {@link java.io.Writer}
 	 *
 	 * @param writer  The Writer to write to.
 	 * @param baseURI base URI

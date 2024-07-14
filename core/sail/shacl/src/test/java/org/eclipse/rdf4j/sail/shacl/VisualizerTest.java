@@ -1,12 +1,17 @@
 /*******************************************************************************
  * Copyright (c) 2018 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.shacl;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -15,14 +20,14 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.sail.NotifyingSailConnection;
 import org.eclipse.rdf4j.sail.SailException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class VisualizerTest {
 
 	@Test
 	public void datatype() throws Exception {
 
-		ShaclSail shaclSail = Utils.getInitializedShaclSail("shaclDatatype.ttl");
+		ShaclSail shaclSail = Utils.getInitializedShaclSail("shaclDatatype.trig");
 
 		try (NotifyingSailConnection connection = shaclSail.getConnection()) {
 			SimpleValueFactory vf = SimpleValueFactory.getInstance();
@@ -50,7 +55,7 @@ public class VisualizerTest {
 	@Test
 	public void maxCount() throws Exception {
 
-		ShaclSail shaclSail = Utils.getInitializedShaclSail("shaclMax.ttl");
+		ShaclSail shaclSail = Utils.getInitializedShaclSail("shaclMax.trig");
 
 		try (NotifyingSailConnection connection = shaclSail.getConnection()) {
 			SimpleValueFactory vf = SimpleValueFactory.getInstance();
@@ -74,10 +79,10 @@ public class VisualizerTest {
 
 	}
 
-	@Test(expected = SailException.class)
+	@Test
 	public void minCount() throws Exception {
 
-		ShaclSail shaclSail = Utils.getInitializedShaclSail("shacl.ttl");
+		ShaclSail shaclSail = Utils.getInitializedShaclSail("shacl.trig");
 
 		try (NotifyingSailConnection connection = shaclSail.getConnection()) {
 			SimpleValueFactory vf = SimpleValueFactory.getInstance();
@@ -94,7 +99,7 @@ public class VisualizerTest {
 			connection.addStatement(bNode2, RDF.TYPE, RDFS.RESOURCE);
 			connection.removeStatement(null, bNode, RDFS.LABEL, vf.createLiteral(""));
 
-			connection.commit();
+			assertThrows(SailException.class, connection::commit);
 		} finally {
 			shaclSail.shutDown();
 		}

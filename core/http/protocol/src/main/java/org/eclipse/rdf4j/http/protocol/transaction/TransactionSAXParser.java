@@ -1,13 +1,17 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.http.protocol.transaction;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +45,11 @@ import org.xml.sax.SAXException;
  */
 class TransactionSAXParser extends SimpleSAXAdapter {
 
-	private ValueFactory valueFactory;
+	private final ValueFactory valueFactory;
 
 	protected Collection<TransactionOperation> txn;
 
-	private List<Value> parsedValues = new ArrayList<>();
+	private final List<Value> parsedValues = new ArrayList<>();
 
 	private List<Binding> bindings;
 
@@ -90,7 +94,7 @@ class TransactionSAXParser extends SimpleSAXAdapter {
 			String encoding = atts.get(TransactionXMLConstants.ENCODING_ATT);
 
 			if (encoding != null && "base64".equalsIgnoreCase(encoding)) {
-				text = new String(javax.xml.bind.DatatypeConverter.parseBase64Binary(text));
+				text = new String(Base64.getDecoder().decode(text));
 			}
 			Literal lit;
 			if (lang != null) {

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.queryrender.sparql.experimental;
 
@@ -19,11 +22,10 @@ import com.google.common.base.Strings;
  * in the fn: namespace. RDF4J immediately converts them into the URI representation when parsing. This leads to
  * failures, however, with some triple stores (like Blazegraph) that do not understand the URI representation of
  * built-ins and try to process them as custom URI functions.
- * 
+ *
  * @author Andriy Nikolov
  * @author Jeen Broekstra
  * @author Andreas Schwarte
- *
  */
 enum FNFunction {
 	CONCAT("CONCAT", FN.CONCAT),
@@ -53,7 +55,7 @@ enum FNFunction {
 	private final String name;
 	private final IRI uri;
 
-	private FNFunction(String name, IRI uri) {
+	FNFunction(String name, IRI uri) {
 		this.name = name;
 		this.uri = uri;
 	}

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.shacl.results;
@@ -33,7 +36,9 @@ import org.eclipse.rdf4j.model.vocabulary.SHACL;
 @Deprecated
 public class ValidationReport {
 
-	protected final Resource id = bnode();
+	private static final DynamicModelFactory DYNAMIC_MODEL_FACTORY = new DynamicModelFactory();
+
+	protected Resource id = null;
 
 	protected boolean conforms = true;
 
@@ -58,8 +63,6 @@ public class ValidationReport {
 		model.add(getId(), RDF.TYPE, SHACL.VALIDATION_REPORT);
 		model.add(getId(), RDF4J.TRUNCATED, BooleanLiteral.valueOf(truncated));
 
-		model.setNamespace(SHACL.NS);
-
 		HashSet<Resource> rdfListDedupe = new HashSet<>();
 
 		for (ValidationResult result : validationResult) {
@@ -71,10 +74,13 @@ public class ValidationReport {
 	}
 
 	public Model asModel() {
-		return asModel(new DynamicModelFactory().createEmptyModel());
+		return asModel(DYNAMIC_MODEL_FACTORY.createEmptyModel());
 	}
 
-	public Resource getId() {
+	public final Resource getId() {
+		if (id == null) {
+			id = bnode();
+		}
 		return id;
 	}
 

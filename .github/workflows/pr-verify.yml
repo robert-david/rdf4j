@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        jdk: [1.8, 15]
+        jdk: [11, 19]
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK
@@ -26,10 +26,12 @@ jobs:
     - name: Build
       run: mvn -B -U -T 2 clean install -Pquick,-formatting -Dmaven.javadoc.skip=true -Djapicmp.skip -Denforcer.skip=true -Danimal.sniffer.skip=true
     - name: Test
-      run: mvn -B clean test -P-formatting -DskipITs -Dmaven.javadoc.skip=true
-    - name: Print test failures
+      run: mvn -B test -P-formatting -DskipITs -Dmaven.javadoc.skip=true
+    - name: Publish Test Report
       if: failure()
-      run: ./scripts/printTestResults.sh
+      uses: scacap/action-surefire-report@v1
+      with:
+        check_name: Test report - build - ${{ matrix.jdk }}
     - name: Cancel workflow on failure
       uses: vishnudxb/cancel-workflow@v1.2
       if: failure()
@@ -44,23 +46,25 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
+        java-version: 11
     - name: Cache local Maven repository
       uses: actions/cache@v2
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-jdk1.8-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-jdk11-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-jdk1.8-maven-
+          ${{ runner.os }}-jdk11-maven-
     - name: Check formatting
       run: mvn -B formatter:validate impsort:check xml-format:xml-check
     - name: Build
       run: mvn -B -U -T 2 clean install -Pquick,-formatting -Dmaven.javadoc.skip=true -Djapicmp.skip -Denforcer.skip=true -Danimal.sniffer.skip=true
     - name: Verify
       run: mvn -B verify -PskipUnitTests,-formatting -Dmaven.javadoc.skip=true -Denforcer.skip=true -Danimal.sniffer.skip=true
-    - name: Print test failures
+    - name: Publish Test Report
       if: failure()
-      run: ./scripts/printTestResults.sh
+      uses: scacap/action-surefire-report@v1
+      with:
+        check_name: Test report - integration-tests
     - name: Cancel workflow on failure
       uses: vishnudxb/cancel-workflow@v1.2
       if: failure()
@@ -75,20 +79,28 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
+        java-version: 11
     - name: Cache local Maven repository
       uses: actions/cache@v2
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-jdk1.8-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-jdk11-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-jdk1.8-maven-
+          ${{ runner.os }}-jdk11-maven-
     - name: Check formatting
       run: mvn -B formatter:validate impsort:check xml-format:xml-check
     - name: Build
       run: mvn -B -U -T 2 clean install -Pquick,-formatting -Dmaven.javadoc.skip=true -Djapicmp.skip -Denforcer.skip=true -Danimal.sniffer.skip=true
     - name: Verify
       run: mvn -B verify -PslowTestsOnly,-skipSlowTests,-formatting -Dmaven.javadoc.skip=true -Djapicmp.skip -Denforcer.skip=true -Danimal.sniffer.skip=true
-    - name: Print test failures
+    - name: Publish Test Report
       if: failure()
-      run: ./scripts/printTestResults.sh
+      uses: scacap/action-surefire-report@v1
+      with:
+        check_name: Test report - slow-tests
+  copyright-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: check copyright header present
+      run: scripts/checkCopyrightPresent.sh

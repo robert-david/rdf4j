@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.federated.write;
 
@@ -17,22 +20,23 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class RepositoryWriteStrategyTest {
 
+	@InjectMocks
 	private RepositoryWriteStrategy strategy;
+	@Mock
 	private Repository writeRepository;
+	@Mock
 	private RepositoryConnection connection;
 
 	@BeforeEach
 	public void setUp() {
-		writeRepository = mock(Repository.class);
-		connection = mock(RepositoryConnection.class);
 		when(writeRepository.getConnection()).thenReturn(connection);
-
-		strategy = new RepositoryWriteStrategy(writeRepository);
 	}
 
 	@Test

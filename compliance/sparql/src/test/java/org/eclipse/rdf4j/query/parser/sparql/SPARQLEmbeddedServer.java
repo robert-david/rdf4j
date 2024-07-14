@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.query.parser.sparql;
 
@@ -16,14 +19,10 @@ import java.util.Properties;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.rdf4j.http.protocol.Protocol;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.config.RepositoryConfig;
 import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
-import org.eclipse.rdf4j.repository.config.RepositoryConfigUtil;
-import org.eclipse.rdf4j.repository.http.HTTPRepository;
-import org.eclipse.rdf4j.repository.manager.SystemRepository;
+import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.sail.config.SailRepositoryConfig;
 import org.eclipse.rdf4j.sail.memory.config.MemoryStoreConfig;
 import org.slf4j.Logger;
@@ -37,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SPARQLEmbeddedServer {
 
-	private static Logger logger = LoggerFactory.getLogger(SPARQLEmbeddedServer.class);
+	private static final Logger logger = LoggerFactory.getLogger(SPARQLEmbeddedServer.class);
 
 	private static final String HOST = "localhost";
 
@@ -46,6 +45,8 @@ public class SPARQLEmbeddedServer {
 	private static final String SERVER_CONTEXT = "/rdf4j-server";
 
 	private final List<String> repositoryIds;
+
+	private final RemoteRepositoryManager repositoryManager;
 
 	private final Server jetty;
 
@@ -63,10 +64,13 @@ public class SPARQLEmbeddedServer {
 		jetty = new Server(PORT);
 
 		WebAppContext webapp = new WebAppContext();
+		webapp.getServerClasspathPattern().add("org.slf4j.", "ch.qos.logback.");
 		webapp.setContextPath(SERVER_CONTEXT);
 		// warPath configured in pom.xml maven-war-plugin configuration
 		webapp.setWar(webappDir);
 		jetty.setHandler(webapp);
+
+		repositoryManager = new RemoteRepositoryManager(getServerUrl());
 	}
 
 	/**
@@ -94,36 +98,29 @@ public class SPARQLEmbeddedServer {
 	}
 
 	public void stop() throws Exception {
-		Repository systemRepo = new HTTPRepository(Protocol.getRepositoryLocation(getServerUrl(), SystemRepository.ID));
-		RepositoryConnection con = systemRepo.getConnection();
 		try {
-			con.clear();
+			repositoryManager.getAllRepositoryInfos().forEach(ri -> repositoryManager.removeRepository(ri.getId()));
+			repositoryManager.shutDown();
 		} finally {
-			con.close();
-			systemRepo.shutDown();
+			jetty.stop();
+			System.clearProperty("org.mortbay.log.class");
 		}
-
-		jetty.stop();
-		System.clearProperty("org.mortbay.log.class");
 	}
 
 	private void createTestRepositories() throws RepositoryException, RepositoryConfigException {
-		Repository systemRep = new HTTPRepository(Protocol.getRepositoryLocation(getServerUrl(), SystemRepository.ID));
-
 		// create a memory store for each provided repository id
 		for (String repId : repositoryIds) {
 			MemoryStoreConfig memStoreConfig = new MemoryStoreConfig();
 			memStoreConfig.setPersist(false);
 			SailRepositoryConfig sailRepConfig = new SailRepositoryConfig(memStoreConfig);
 			RepositoryConfig repConfig = new RepositoryConfig(repId, sailRepConfig);
-
-			RepositoryConfigUtil.updateRepositoryConfigs(systemRep, repConfig);
+			repositoryManager.addRepositoryConfig(repConfig);
 		}
 
 	}
 
 	static class PropertiesReader {
-		private Properties properties;
+		private final Properties properties;
 
 		public PropertiesReader(String propertyFileName) throws IOException {
 			InputStream is = getClass().getClassLoader()

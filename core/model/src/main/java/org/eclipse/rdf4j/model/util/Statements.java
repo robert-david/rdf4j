@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.model.util;
 
@@ -14,7 +17,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.eclipse.rdf4j.OpenRDFUtil;
 import org.eclipse.rdf4j.common.annotation.Experimental;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -36,7 +38,7 @@ public class Statements {
 	/**
 	 * A {@link Function} that maps {@link Triple} to {@link org.eclipse.rdf4j.model.BNode} consistently. Multiple
 	 * invocations for the same {@link Triple} will return the same {@link org.eclipse.rdf4j.model.BNode}.
-	 *
+	 * <p>
 	 * The current implementation creates a {@link org.eclipse.rdf4j.model.BNode} by encoding the string representation
 	 * of the {@link Triple} using base64 URL-safe encoding.
 	 */
@@ -59,7 +61,9 @@ public class Statements {
 	 */
 	public static void consume(ValueFactory vf, Resource subject, IRI predicate, Value object,
 			Consumer<Statement> consumer, Resource... contexts) {
-		OpenRDFUtil.verifyContextNotNull(contexts);
+		Objects.requireNonNull(contexts,
+				"contexts argument may not be null; either the value should be cast to Resource or an empty array should be supplied");
+
 		Objects.requireNonNull(consumer);
 
 		if (contexts.length > 0) {
@@ -81,9 +85,9 @@ public class Statements {
 	 * @param object     the object of each statement. May not be null.
 	 * @param collection the collection of Statements to which the newly created Statements will be added. May not be
 	 *                   null.
+	 * @param contexts   the context(s) for which to produce statements. This argument is an optional vararg: leave it
+	 *                   out completely to produce a single statement without context.
 	 * @return the input collection of Statements, with the newly created Statements added.
-	 * @param contexts the context(s) for which to produce statements. This argument is an optional vararg: leave it out
-	 *                 completely to produce a single statement without context.
 	 */
 	public static <C extends Collection<Statement>> C create(ValueFactory vf, Resource subject, IRI predicate,
 			Value object, C collection, Resource... contexts) {
@@ -98,7 +102,6 @@ public class Statements {
 	 *
 	 * @param statement the statement to strip the context from
 	 * @return a statement without context
-	 *
 	 * @since 3.1.0
 	 */
 	public static Statement stripContext(Statement statement) {
@@ -112,7 +115,6 @@ public class Statements {
 	 * @param vf        the {@link ValueFactory} to use for creating a new {@link Statement}.
 	 * @param statement the statement to strip the context from.
 	 * @return a statement without context
-	 *
 	 * @since 3.1.0
 	 */
 	public static Statement stripContext(ValueFactory vf, Statement statement) {
@@ -128,9 +130,9 @@ public class Statements {
 	 * @param statement a statement to convert to an RDF-star triple
 	 * @return an {@link Triple RDF-star triple} with the same subject, predicate and object as the input statement.
 	 * @since 3.4.0
-	 * @deprecated since 3.5.0 - use {@link Values#triple(Statement)} instead
+	 * @deprecated Use {@link Values#triple(Statement)} instead
 	 */
-	@Deprecated
+	@Deprecated(since = "3.5.0")
 	public static Triple toTriple(Statement statement) {
 		return toTriple(SimpleValueFactory.getInstance(), statement);
 	}
@@ -142,16 +144,15 @@ public class Statements {
 	 * @param statement a statement to convert to an RDF-star triple
 	 * @return an {@link Triple RDF-star triple} with the same subject, predicate and object as the input statement.
 	 * @since 3.4.0
-	 * 
-	 * @deprecated since 3.5.0 - use {@link Values#triple(ValueFactory, Statement)} instead
+	 * @deprecated Use {@link Values#triple(ValueFactory, Statement)} instead
 	 */
-	@Deprecated
+	@Deprecated(since = "3.5.0")
 	public static Triple toTriple(ValueFactory vf, Statement statement) {
 		return vf.createTriple(statement.getSubject(), statement.getPredicate(), statement.getObject());
 	}
 
 	/**
-	 * Create a {@link Statement} from the supplied { @link Triple RDF-star triple}
+	 * Create a {@link Statement} from the supplied {@link Triple RDF-star triple}
 	 *
 	 * @param triple an RDF-star triple to convert to a {@link Statement}.
 	 * @return an {@link Statement} with the same subject, predicate and object as the input triple, and no context.
@@ -163,7 +164,7 @@ public class Statements {
 	}
 
 	/**
-	 * Create a {@link Statement} from the supplied { @link Triple RDF-star triple}
+	 * Create a {@link Statement} from the supplied {@link Triple RDF-star triple}
 	 *
 	 * @param triple an RDF-star triple to convert to a {@link Statement}.
 	 * @return an {@link Statement} with the same subject, predicate and object as the input triple, and no context.
@@ -174,7 +175,7 @@ public class Statements {
 	}
 
 	/**
-	 * Create a {@link Statement} from the supplied { @link Triple RDF-star triple} and context.
+	 * Create a {@link Statement} from the supplied {@link Triple RDF-star triple} and context.
 	 *
 	 * @param triple  an RDF-star triple to convert to a {@link Statement}.
 	 * @param context the context to assign to the {@link Statement}.
@@ -187,7 +188,7 @@ public class Statements {
 	}
 
 	/**
-	 * Create a {@link Statement} from the supplied { @link Triple RDF-star triple} and context.
+	 * Create a {@link Statement} from the supplied {@link Triple RDF-star triple} and context.
 	 *
 	 * @param triple  an RDF-star triple to convert to a {@link Statement}.
 	 * @param context the context to assign to the {@link Statement}.
@@ -201,7 +202,7 @@ public class Statements {
 	}
 
 	/**
-	 * Create a {@link Statement} from the supplied { @link Triple RDF-star triple} and context.
+	 * Create a {@link Statement} from the supplied {@link Triple RDF-star triple} and context.
 	 *
 	 * @param vf      the {@link ValueFactory} to use for creating the {@link Statement} object.
 	 * @param triple  an RDF-star triple to convert to a {@link Statement}.
@@ -209,14 +210,14 @@ public class Statements {
 	 * @return an {@link Statement} with the same subject, predicate and object as the input triple, and having the
 	 *         supplied context.
 	 * @since 3.4.0
-	 * @deprecated Use {@link #statement(ValueFactory,Triple,Resource)} instead
+	 * @deprecated Use {@link #statement(ValueFactory, Triple, Resource)} instead
 	 */
 	public static Statement toStatement(ValueFactory vf, Triple triple, Resource context) {
 		return statement(vf, triple, context);
 	}
 
 	/**
-	 * Create a {@link Statement} from the supplied { @link Triple RDF-star triple} and context.
+	 * Create a {@link Statement} from the supplied {@link Triple RDF-star triple} and context.
 	 *
 	 * @param vf      the {@link ValueFactory} to use for creating the {@link Statement} object.
 	 * @param triple  an RDF-star triple to convert to a {@link Statement}.

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.config;
 
@@ -11,14 +14,18 @@ import static org.eclipse.rdf4j.sail.config.SailConfigSchema.DELEGATE;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.util.Configurations;
 import org.eclipse.rdf4j.model.util.ModelException;
-import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.model.vocabulary.CONFIG;
 
 /**
  * @author Herko ter Horst
  */
 public abstract class AbstractDelegatingSailImplConfig extends AbstractSailImplConfig
 		implements DelegatingSailImplConfig {
+
+	private static final boolean USE_CONFIG = "true"
+			.equalsIgnoreCase(System.getProperty("org.eclipse.rdf4j.model.vocabulary.experimental.enableConfig"));
 
 	private SailImplConfig delegate;
 
@@ -68,7 +75,11 @@ public abstract class AbstractDelegatingSailImplConfig extends AbstractSailImplC
 
 		if (delegate != null) {
 			Resource delegateNode = delegate.export(m);
-			m.add(implNode, DELEGATE, delegateNode);
+			if (USE_CONFIG) {
+				m.add(implNode, CONFIG.delegate, delegateNode);
+			} else {
+				m.add(implNode, DELEGATE, delegateNode);
+			}
 		}
 
 		return implNode;
@@ -79,7 +90,7 @@ public abstract class AbstractDelegatingSailImplConfig extends AbstractSailImplC
 		super.parse(m, implNode);
 
 		try {
-			Models.objectResource(m.getStatements(implNode, DELEGATE, null))
+			Configurations.getResourceValue(m, implNode, CONFIG.delegate, DELEGATE)
 					.ifPresent(delegate -> setDelegate(SailConfigUtil.parseRepositoryImpl(m, delegate)));
 		} catch (ModelException e) {
 			throw new SailConfigException(e.getMessage(), e);

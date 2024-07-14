@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.federated.evaluation;
 
@@ -84,7 +87,7 @@ public interface TripleSource {
 	 * @Deprecated will be removed in 4.0. Replaced with
 	 *             {@link #getStatements(String, BindingSet, QueryType, QueryInfo)}
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	default CloseableIteration<BindingSet, QueryEvaluationException> getStatements(String preparedQuery,
 			QueryType queryType, QueryInfo queryInfo)
 			throws RepositoryException, MalformedQueryException, QueryEvaluationException {
@@ -191,7 +194,7 @@ public interface TripleSource {
 	 * @return true if a prepared query is to be used preferably, false otherwise
 	 * @deprecated replaced with {@link #usePreparedQuery(StatementPattern, QueryInfo)}, to be removed in 4.0
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	default boolean usePreparedQuery() {
 		return true;
 	}

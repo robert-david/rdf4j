@@ -1,17 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.http.protocol.transaction;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-
-import javax.xml.bind.DatatypeConverter;
+import java.util.Base64;
 
 import org.eclipse.rdf4j.common.xml.XMLUtil;
 import org.eclipse.rdf4j.common.xml.XMLWriter;
@@ -296,7 +298,7 @@ public class TransactionWriter {
 
 			if (!valid) {
 				xmlWriter.setAttribute(TransactionXMLConstants.ENCODING_ATT, "base64");
-				label = DatatypeConverter.printBase64Binary(label.getBytes(StandardCharsets.UTF_8));
+				label = Base64.getEncoder().encodeToString(label.getBytes(StandardCharsets.UTF_8));
 			}
 
 			xmlWriter.textElement(TransactionXMLConstants.LITERAL_TAG, label);

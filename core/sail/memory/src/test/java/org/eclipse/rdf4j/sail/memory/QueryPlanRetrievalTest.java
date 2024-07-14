@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.memory;
@@ -16,7 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.rdf4j.IsolationLevels;
+import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.FOAF;
@@ -29,9 +32,8 @@ import org.eclipse.rdf4j.query.explanation.GenericPlanNode;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class QueryPlanRetrievalTest {
 
@@ -106,12 +108,14 @@ public class QueryPlanRetrievalTest {
 					"      ║  └──Join\n" +
 					"      ║     ╠══StatementPattern\n" +
 					"      ║     ║     Var (name=a)\n" +
-					"      ║     ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"      ║     ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"      ║     ║     Var (name=c)\n" +
 					"      ║     ╚══StatementPattern\n" +
 					"      ║           Var (name=a)\n" +
-					"      ║           Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"      ║           Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"      ║           Var (name=d)\n" +
 					"      ╚══StatementPattern\n" +
@@ -119,7 +123,7 @@ public class QueryPlanRetrievalTest {
 					"            Var (name=e)\n" +
 					"            Var (name=f)\n";
 
-			Assert.assertEquals(expected, actual);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 
 		}
 		sailRepository.shutDown();
@@ -140,21 +144,23 @@ public class QueryPlanRetrievalTest {
 					"   ├──Join (JoinIterator)\n" +
 					"   │  ╠══StatementPattern (costEstimate=1, resultSizeEstimate=4)\n" +
 					"   │  ║     Var (name=a)\n" +
-					"   │  ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"   │  ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"   │  ║     Var (name=d)\n" +
 					"   │  ╚══Filter\n" +
 					"   │     ├──Compare (!=)\n" +
 					"   │     │     Var (name=c)\n" +
 					"   │     │     Var (name=d)\n" +
-					"   │     └──Join\n" +
+					"   │     └──Join (HashJoinIteration)\n" +
 					"   │        ╠══Filter\n" +
 					"   │        ║  ├──Compare (!=)\n" +
 					"   │        ║  │     Var (name=c)\n" +
 					"   │        ║  │     ValueConstant (value=\"<\")\n" +
 					"   │        ║  └──StatementPattern (costEstimate=2, resultSizeEstimate=4)\n" +
 					"   │        ║        Var (name=a)\n" +
-					"   │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"   │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"   │        ║        Var (name=c)\n" +
 					"   │        ╚══LeftJoin (new scope) (costEstimate=5, resultSizeEstimate=12)\n" +
@@ -167,7 +173,7 @@ public class QueryPlanRetrievalTest {
 					"         Var (name=d)\n" +
 					"         Var (name=e)\n" +
 					"         Var (name=f)\n";
-			Assert.assertEquals(expected, actual);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 
 		}
 		sailRepository.shutDown();
@@ -175,7 +181,7 @@ public class QueryPlanRetrievalTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testTupleQueryTimed() {
 		SailRepository sailRepository = new SailRepository(new MemoryStore());
 		addData(sailRepository);
@@ -218,7 +224,8 @@ public class QueryPlanRetrievalTest {
 					"   ├──Join (JoinIterator) (resultSizeActual=2)\n" +
 					"   │  ╠══StatementPattern (costEstimate=1, resultSizeEstimate=4, resultSizeActual=4)\n" +
 					"   │  ║     Var (name=a)\n" +
-					"   │  ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"   │  ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"   │  ║     Var (name=d)\n" +
 					"   │  ╚══Filter (resultSizeActual=2)\n" +
@@ -230,12 +237,15 @@ public class QueryPlanRetrievalTest {
 					"   │        ║  ├──Compare (!=)\n" +
 					"   │        ║  │     Var (name=c)\n" +
 					"   │        ║  │     ValueConstant (value=\"<\")\n" +
-					"   │        ║  └──StatementPattern (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)\n" +
+					"   │        ║  └──StatementPattern (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)"
+					+ "\n" +
 					"   │        ║        Var (name=a)\n" +
-					"   │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"   │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"   │        ║        Var (name=c)\n" +
-					"   │        ╚══LeftJoin (new scope) (BadlyDesignedLeftJoinIterator) (costEstimate=5, resultSizeEstimate=12, resultSizeActual=4)\n"
+					"   │        ╚══LeftJoin (new scope) (BadlyDesignedLeftJoinIterator) (costEstimate=5, resultSizeEstimate=12, resultSizeActual=4)"
+					+ "\n"
 					+
 					"   │           ├──SingletonSet (resultSizeActual=4)\n" +
 					"   │           └──StatementPattern (resultSizeEstimate=12, resultSizeActual=48)\n" +
@@ -246,7 +256,7 @@ public class QueryPlanRetrievalTest {
 					"         Var (name=d)\n" +
 					"         Var (name=e)\n" +
 					"         Var (name=f)\n";
-			Assert.assertEquals(expected, actual);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 
 		}
 		sailRepository.shutDown();
@@ -269,7 +279,8 @@ public class QueryPlanRetrievalTest {
 					"   ├──Join (JoinIterator) (resultSizeActual=2)\n" +
 					"   │  ╠══StatementPattern (costEstimate=1, resultSizeEstimate=4, resultSizeActual=4)\n" +
 					"   │  ║     Var (name=a)\n" +
-					"   │  ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"   │  ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"   │  ║     Var (name=d)\n" +
 					"   │  ╚══Filter (resultSizeActual=2)\n" +
@@ -281,12 +292,15 @@ public class QueryPlanRetrievalTest {
 					"   │        ║  ├──Compare (!=)\n" +
 					"   │        ║  │     Var (name=c)\n" +
 					"   │        ║  │     ValueConstant (value=\"<\")\n" +
-					"   │        ║  └──StatementPattern (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)\n" +
+					"   │        ║  └──StatementPattern (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)"
+					+ "\n" +
 					"   │        ║        Var (name=a)\n" +
-					"   │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"   │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"   │        ║        Var (name=c)\n" +
-					"   │        ╚══LeftJoin (new scope) (BadlyDesignedLeftJoinIterator) (costEstimate=5, resultSizeEstimate=12, resultSizeActual=4)\n"
+					"   │        ╚══LeftJoin (new scope) (BadlyDesignedLeftJoinIterator) (costEstimate=5, resultSizeEstimate=12, resultSizeActual=4)"
+					+ "\n"
 					+
 					"   │           ├──SingletonSet (resultSizeActual=4)\n" +
 					"   │           └──StatementPattern (resultSizeEstimate=12, resultSizeActual=48)\n" +
@@ -297,7 +311,8 @@ public class QueryPlanRetrievalTest {
 					"         Var (name=d)\n" +
 					"         Var (name=e)\n" +
 					"         Var (name=f)\n";
-			Assert.assertEquals(expected, actual);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
+
 		}
 		sailRepository.shutDown();
 
@@ -336,7 +351,8 @@ public class QueryPlanRetrievalTest {
 					"        \"plans\" : [ {\n" +
 					"          \"type\" : \"Var (name=a)\"\n" +
 					"        }, {\n" +
-					"          \"type\" : \"Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\"\n"
+					"          \"type\" : \"Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\""
+					+ "\n"
 					+
 					"        }, {\n" +
 					"          \"type\" : \"Var (name=d)\"\n" +
@@ -373,7 +389,8 @@ public class QueryPlanRetrievalTest {
 					"              \"plans\" : [ {\n" +
 					"                \"type\" : \"Var (name=a)\"\n" +
 					"              }, {\n" +
-					"                \"type\" : \"Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\"\n"
+					"                \"type\" : \"Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\""
+					+ "\n"
 					+
 					"              }, {\n" +
 					"                \"type\" : \"Var (name=c)\"\n" +
@@ -418,7 +435,7 @@ public class QueryPlanRetrievalTest {
 					"    } ]\n" +
 					"  } ]\n" +
 					"}";
-			Assert.assertEquals(expected, actual);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 
 		}
 		sailRepository.shutDown();
@@ -467,7 +484,7 @@ public class QueryPlanRetrievalTest {
 					"         Var (name=d)\n" +
 					"         Var (name=e)\n" +
 					"         Var (name=f)\n";
-			Assert.assertEquals(expected, actual);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 
 		}
 		sailRepository.shutDown();
@@ -497,9 +514,11 @@ public class QueryPlanRetrievalTest {
 					+ "      Extension (resultSizeActual=2)\n"
 					+ "      ╠══LeftJoin (LeftJoinIterator) (resultSizeActual=2)\n"
 					+ "      ║  ├──Join (JoinIterator) (resultSizeActual=2)\n"
-					+ "      ║  │  ╠══StatementPattern (costEstimate=1, resultSizeEstimate=4, resultSizeActual=4)\n"
+					+ "      ║  │  ╠══StatementPattern (costEstimate=1, resultSizeEstimate=4, resultSizeActual=4)"
+					+ "\n"
 					+ "      ║  │  ║     Var (name=a)\n"
-					+ "      ║  │  ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					+ "      ║  │  ║     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+ "      ║  │  ║     Var (name=d)\n"
 					+ "      ║  │  ╚══Filter (resultSizeActual=2)\n"
 					+ "      ║  │     ├──Compare (!=)\n"
@@ -510,11 +529,14 @@ public class QueryPlanRetrievalTest {
 					+ "      ║  │        ║  ├──Compare (!=)\n"
 					+ "      ║  │        ║  │     Var (name=c)\n"
 					+ "      ║  │        ║  │     ValueConstant (value=\"<\")\n"
-					+ "      ║  │        ║  └──StatementPattern (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)\n"
+					+ "      ║  │        ║  └──StatementPattern (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)"
+					+ "\n"
 					+ "      ║  │        ║        Var (name=a)\n"
-					+ "      ║  │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					+ "      ║  │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+ "      ║  │        ║        Var (name=c)\n"
-					+ "      ║  │        ╚══LeftJoin (new scope) (BadlyDesignedLeftJoinIterator) (costEstimate=5, resultSizeEstimate=12, resultSizeActual=4)\n"
+					+ "      ║  │        ╚══LeftJoin (new scope) (BadlyDesignedLeftJoinIterator) (costEstimate=5, resultSizeEstimate=12, resultSizeActual=4)"
+					+ "\n"
 					+ "      ║  │           ├──SingletonSet (resultSizeActual=4)\n"
 					+ "      ║  │           └──StatementPattern (resultSizeEstimate=12, resultSizeActual=48)\n"
 					+ "      ║  │                 Var (name=d)\n"
@@ -527,14 +549,14 @@ public class QueryPlanRetrievalTest {
 					+ "      ╚══ExtensionElem (_const_f5e5585a_uri)\n"
 					+ "            ValueConstant (value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type)\n";
 
-			Assert.assertEquals(expected, actual);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 
 		}
 		sailRepository.shutDown();
 
 	}
 
-	@Ignore // slow test used for debugging
+	@Disabled // slow test used for debugging
 	@Test
 	public void bigDataset() throws IOException {
 		SailRepository repository = new SailRepository(new MemoryStore());
@@ -577,7 +599,8 @@ public class QueryPlanRetrievalTest {
 					"   │  ║     ProjectionElem \"a\"\n" +
 					"   │  ╚══StatementPattern (resultSizeActual=4)\n" +
 					"   │        Var (name=a)\n" +
-					"   │        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"   │        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"   │        Var (name=type)\n" +
 					"   └──Projection (new scope) (resultSizeActual=2)\n" +
@@ -602,12 +625,14 @@ public class QueryPlanRetrievalTest {
 					"         │        ║  │     ValueConstant (value=\"<\")\n" +
 					"         │        ║  └──StatementPattern (resultSizeActual=48)\n" +
 					"         │        ║        Var (name=a)\n" +
-					"         │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"         │        ║        Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"         │        ║        Var (name=c)\n" +
 					"         │        ╚══StatementPattern (resultSizeActual=6)\n" +
 					"         │              Var (name=a)\n" +
-					"         │              Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					"         │              Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+
 					"         │              Var (name=d)\n" +
 					"         └──StatementPattern (resultSizeActual=2)\n" +
@@ -615,7 +640,7 @@ public class QueryPlanRetrievalTest {
 					"               Var (name=e)\n" +
 					"               Var (name=f)\n";
 
-			Assert.assertEquals(expected, actual);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 
 		}
 
@@ -638,39 +663,48 @@ public class QueryPlanRetrievalTest {
 					+ "╚══Join (JoinIterator) (resultSizeActual=24)\n"
 					+ "   ├──StatementPattern (costEstimate=1, resultSizeEstimate=4, resultSizeActual=4)\n"
 					+ "   │     Var (name=a)\n"
-					+ "   │     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					+ "   │     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+ "   │     Var (name=type)\n"
 					+ "   └──Union (resultSizeActual=24)\n"
 					+ "      ╠══Join (JoinIterator) (resultSizeActual=20)\n"
-					+ "      ║  ├──StatementPattern (costEstimate=2, resultSizeEstimate=12, resultSizeActual=6)\n"
+					+ "      ║  ├──StatementPattern (costEstimate=2, resultSizeEstimate=12, resultSizeActual=6)"
+					+ "\n"
 					+ "      ║  │     Var (name=a)\n"
 					+ "      ║  │     Var (name=b)\n"
 					+ "      ║  │     Var (name=c2)\n"
 					+ "      ║  └──Union (resultSizeActual=20)\n"
 					+ "      ║     ╠══Join (JoinIterator) (resultSizeActual=10)\n"
-					+ "      ║     ║  ├──StatementPattern (new scope) (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)\n"
+					+ "      ║     ║  ├──StatementPattern (new scope) (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)"
+					+ "\n"
 					+ "      ║     ║  │     Var (name=c2)\n"
-					+ "      ║     ║  │     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					+ "      ║     ║  │     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+ "      ║     ║  │     Var (name=type1)\n"
-					+ "      ║     ║  └──StatementPattern (costEstimate=2, resultSizeEstimate=12, resultSizeActual=10)\n"
+					+ "      ║     ║  └──StatementPattern (costEstimate=2, resultSizeEstimate=12, resultSizeActual=10)"
+					+ "\n"
 					+ "      ║     ║        Var (name=a)\n"
 					+ "      ║     ║        Var (name=b)\n"
 					+ "      ║     ║        Var (name=c)\n"
 					+ "      ║     ╚══Join (JoinIterator) (resultSizeActual=10)\n"
-					+ "      ║        ├──StatementPattern (new scope) (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)\n"
+					+ "      ║        ├──StatementPattern (new scope) (costEstimate=2, resultSizeEstimate=4, resultSizeActual=6)"
+					+ "\n"
 					+ "      ║        │     Var (name=c2)\n"
-					+ "      ║        │     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)\n"
+					+ "      ║        │     Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)"
+					+ "\n"
 					+ "      ║        │     Var (name=type2)\n"
-					+ "      ║        └──StatementPattern (costEstimate=2, resultSizeEstimate=12, resultSizeActual=10)\n"
+					+ "      ║        └──StatementPattern (costEstimate=2, resultSizeEstimate=12, resultSizeActual=10)"
+					+ "\n"
 					+ "      ║              Var (name=a)\n"
 					+ "      ║              Var (name=b)\n"
 					+ "      ║              Var (name=c)\n"
-					+ "      ╚══StatementPattern (new scope) (costEstimate=5, resultSizeEstimate=12, resultSizeActual=4)\n"
+					+ "      ╚══StatementPattern (new scope) (costEstimate=5, resultSizeEstimate=12, resultSizeActual=4)"
+					+ "\n"
 					+ "            Var (name=type)\n"
 					+ "            Var (name=d)\n"
 					+ "            Var (name=c)\n";
 
-			Assert.assertEquals(expected, actual);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 
 		}
 
@@ -729,108 +763,141 @@ public class QueryPlanRetrievalTest {
 			String actual = explain.toDot();
 			actual = actual.replaceAll("UUID_\\w+", "UUID");
 
-			assertEquals("digraph Explanation {\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Projection</U></td></tr></table>> shape=plaintext];\n"
+			String expected = "digraph Explanation {\n" +
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Projection</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"left\"] ;\n" +
 					"   UUID -> UUID [label=\"right\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>ProjectionElemList</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>ProjectionElemList</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>ProjectionElem &quot;a&quot;</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>ProjectionElem &quot;a&quot;</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>LeftJoin</U></td></tr> <tr><td>Algorithm</td><td>LeftJoinIterator</td></tr></table>> shape=plaintext];\n"
-					+
-					"   UUID -> UUID [label=\"left\"] ;\n" +
-					"   UUID -> UUID [label=\"right\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Join</U></td></tr> <tr><td>Algorithm</td><td>JoinIterator</td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>LeftJoin</U></td></tr> <tr><td>Algorithm</td><td>LeftJoinIterator</td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"left\"] ;\n" +
 					"   UUID -> UUID [label=\"right\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>StatementPattern</U></td></tr> <tr><td>Cost estimate</td><td>1</td></tr> <tr><td>Result size estimate</td><td>4</td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Join</U></td></tr> <tr><td>Algorithm</td><td>JoinIterator</td></tr></table>> shape=plaintext];"
+					+ "\n"
+					+
+					"   UUID -> UUID [label=\"left\"] ;\n" +
+					"   UUID -> UUID [label=\"right\"] ;\n" +
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>StatementPattern</U></td></tr> <tr><td>Cost estimate</td><td>1</td></tr> <tr><td>Result size estimate</td><td>4</td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"index 0\"] ;\n" +
 					"   UUID -> UUID [label=\"index 1\"] ;\n" +
 					"   UUID -> UUID [label=\"index 2\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=a)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=a)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=d)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=d)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Filter</U></td></tr></table>> shape=plaintext];\n"
-					+
-					"   UUID -> UUID [label=\"left\"] ;\n" +
-					"   UUID -> UUID [label=\"right\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Compare (!=)</U></td></tr></table>> shape=plaintext];\n"
-					+
-					"   UUID -> UUID [label=\"left\"] ;\n" +
-					"   UUID -> UUID [label=\"right\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=c)</U></td></tr></table>> shape=plaintext];\n"
-					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=d)</U></td></tr></table>> shape=plaintext];\n"
-					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Join</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Filter</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"left\"] ;\n" +
 					"   UUID -> UUID [label=\"right\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Filter</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Compare (!=)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"left\"] ;\n" +
 					"   UUID -> UUID [label=\"right\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Compare (!=)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=c)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
+					+
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=d)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
+					+
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Join</U></td></tr> <tr><td>Algorithm</td><td>HashJoinIteration</td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"left\"] ;\n" +
 					"   UUID -> UUID [label=\"right\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=c)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Filter</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>ValueConstant (value=&quot;&lt;&quot;)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID -> UUID [label=\"left\"] ;\n" +
+					"   UUID -> UUID [label=\"right\"] ;\n" +
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Compare (!=)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>StatementPattern</U></td></tr> <tr><td>Cost estimate</td><td>2</td></tr> <tr><td>Result size estimate</td><td>4</td></tr></table>> shape=plaintext];\n"
+					"   UUID -> UUID [label=\"left\"] ;\n" +
+					"   UUID -> UUID [label=\"right\"] ;\n" +
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=c)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
+					+
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>ValueConstant (value=&quot;&lt;&quot;)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
+					+
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>StatementPattern</U></td></tr> <tr><td>Cost estimate</td><td>2</td></tr> <tr><td>Result size estimate</td><td>4</td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"index 0\"] ;\n" +
 					"   UUID -> UUID [label=\"index 1\"] ;\n" +
 					"   UUID -> UUID [label=\"index 2\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=a)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=a)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=_const_f5e5585a_uri, value=http://www.w3.org/1999/02/22-rdf-syntax-ns#type, anonymous)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=c)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=c)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   subgraph cluster_UUID {\n" +
 					"   color=grey\n" +
-					"UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>LeftJoin</U></td></tr> <tr><td><B>New scope</B></td><td><B>true</B></td></tr> <tr><td>Cost estimate</td><td>5</td></tr> <tr><td>Result size estimate</td><td>12</td></tr></table>> shape=plaintext];\n"
+					"UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>LeftJoin</U></td></tr> <tr><td><B>New scope</B></td><td><B>true</B></td></tr> <tr><td>Cost estimate</td><td>5</td></tr> <tr><td>Result size estimate</td><td>12</td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"left\"] ;\n" +
 					"   UUID -> UUID [label=\"right\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>SingletonSet</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>SingletonSet</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>StatementPattern</U></td></tr> <tr><td>Result size estimate</td><td>12</td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>StatementPattern</U></td></tr> <tr><td>Result size estimate</td><td>12</td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"index 0\"] ;\n" +
 					"   UUID -> UUID [label=\"index 1\"] ;\n" +
 					"   UUID -> UUID [label=\"index 2\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=d)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=d)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=e)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=e)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=f)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=f)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"\n" +
 					"}\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>StatementPattern</U></td></tr> <tr><td>Result size estimate</td><td>12</td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>StatementPattern</U></td></tr> <tr><td>Result size estimate</td><td>12</td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"   UUID -> UUID [label=\"index 0\"] ;\n" +
 					"   UUID -> UUID [label=\"index 1\"] ;\n" +
 					"   UUID -> UUID [label=\"index 2\"] ;\n" +
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=d)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=d)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=e)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=e)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
-					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=f)</U></td></tr></table>> shape=plaintext];\n"
+					"   UUID [label=<<table BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"3\" ><tr><td COLSPAN=\"2\" BGCOLOR=\"#FFFFFF\"><U>Var (name=f)</U></td></tr></table>> shape=plaintext];"
+					+ "\n"
 					+
 					"\n" +
-					"}\n", actual);
+					"}\n";
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 
 		}
 		sailRepository.shutDown();
@@ -865,26 +932,52 @@ public class QueryPlanRetrievalTest {
 	}
 
 	@Test
+	public void testWildcard() {
+
+		String expected = "Projection\n" +
+				"╠══ProjectionElemList\n" +
+				"║     ProjectionElem \"a\"\n" +
+				"║     ProjectionElem \"b\"\n" +
+				"║     ProjectionElem \"c\"\n" +
+				"╚══StatementPattern (resultSizeEstimate=12)\n" +
+				"      Var (name=a)\n" +
+				"      Var (name=b)\n" +
+				"      Var (name=c)\n";
+		SailRepository sailRepository = new SailRepository(new MemoryStore());
+		addData(sailRepository);
+
+		try (SailRepositoryConnection connection = sailRepository.getConnection()) {
+			TupleQuery query = connection.prepareTupleQuery("select * where {?a ?b ?c.}");
+			String actual = query.explain(Explanation.Level.Optimized).toString();
+
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
+		}
+		sailRepository.shutDown();
+
+	}
+
+	@Test
 	public void testArbitraryLengthPath() {
 
-		String expected = "Projection\n"
-				+ "╠══ProjectionElemList\n"
-				+ "║     ProjectionElem \"a\"\n"
-				+ "║     ProjectionElem \"b\"\n"
-				+ "║     ProjectionElem \"c\"\n"
-				+ "║     ProjectionElem \"d\"\n"
-				+ "╚══Join (JoinIterator)\n"
-				+ "   ├──StatementPattern (costEstimate=6, resultSizeEstimate=12)\n"
-				+ "   │     Var (name=a)\n"
-				+ "   │     Var (name=b)\n"
-				+ "   │     Var (name=c)\n"
-				+ "   └──ArbitraryLengthPath (costEstimate=5, resultSizeEstimate=24)\n"
-				+ "         Var (name=c)\n"
-				+ "         StatementPattern (resultSizeEstimate=0)\n"
-				+ "            Var (name=c)\n"
-				+ "            Var (name=_const_f804988f_uri, value=http://a, anonymous)\n"
-				+ "            Var (name=d)\n"
-				+ "         Var (name=d)\n";
+		String expected = "Projection\n" +
+				"╠══ProjectionElemList\n" +
+				"║     ProjectionElem \"a\"\n" +
+				"║     ProjectionElem \"b\"\n" +
+				"║     ProjectionElem \"c\"\n" +
+				"║     ProjectionElem \"d\"\n" +
+				"╚══Join (JoinIterator)\n" +
+				"   ├──StatementPattern (costEstimate=6, resultSizeEstimate=12)\n" +
+				"   │     Var (name=a)\n" +
+				"   │     Var (name=b)\n" +
+				"   │     Var (name=c)\n" +
+				"   └──ArbitraryLengthPath (costEstimate=5, resultSizeEstimate=24)\n" +
+				"         Var (name=c)\n" +
+				"         StatementPattern (resultSizeEstimate=0)\n" +
+				"            Var (name=c)\n" +
+				"            Var (name=_const_f804988f_uri, value=http://a, anonymous)\n" +
+				"            Var (name=d)\n" +
+				"         Var (name=d)\n" +
+				"";
 		SailRepository sailRepository = new SailRepository(new MemoryStore());
 		addData(sailRepository);
 
@@ -892,7 +985,8 @@ public class QueryPlanRetrievalTest {
 			TupleQuery query = connection.prepareTupleQuery("select * where {?a ?b ?c. ?c <http://a>* ?d}");
 			String actual = query.explain(Explanation.Level.Optimized).toString();
 
-			assertThat(actual).isEqualTo(expected);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
+
 		}
 		sailRepository.shutDown();
 

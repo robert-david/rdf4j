@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.workbench.commands;
 
@@ -11,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.eclipse.rdf4j.RDF4JException;
+import org.eclipse.rdf4j.common.exception.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -25,9 +28,9 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.eclipse.rdf4j.workbench.commands.ExploreServlet.ResultCursor;
 import org.eclipse.rdf4j.workbench.util.TupleResultBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Dale Visser
@@ -51,10 +54,9 @@ public class TestExploreServlet {
 	 * @throws MalformedQueryException  if an issue occurs inserting data
 	 * @throws UpdateExecutionException if an issue occurs inserting data
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() throws RepositoryException, MalformedQueryException, UpdateExecutionException {
 		Repository repo = new SailRepository(new MemoryStore());
-		repo.initialize();
 		connection = repo.getConnection();
 		servlet = new ExploreServlet();
 		ValueFactory factory = connection.getValueFactory();
@@ -68,7 +70,7 @@ public class TestExploreServlet {
 		builder = mock(TupleResultBuilder.class);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws RepositoryException {
 		connection.close();
 		servlet.destroy();

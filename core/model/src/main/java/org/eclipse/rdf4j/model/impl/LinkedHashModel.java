@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.model.impl;
 
@@ -29,7 +32,7 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.util.PatternIterator;
 
 /**
- * Hash table based implementation of the <tt>{@link Model}</tt> interface.
+ * Hash table based implementation of the <var>{@link Model}</var> interface.
  * <p>
  * This implementation provides constant-time performance for filters using a single term, assuming the hash function
  * disperses the elements properly among the buckets. Each term is indexed using a {@link HashMap}. When multiple terms
@@ -41,7 +44,6 @@ import org.eclipse.rdf4j.model.util.PatternIterator;
  * synchronizing on some object that naturally encapsulates the model. If no such object exists, the set should be
  * "wrapped" using the * Models.synchronizedModel method.
  * </p>
- *
  *
  * @author James Leigh
  */
@@ -290,9 +292,9 @@ public class LinkedHashModel extends AbstractModel {
 
 	private class ModelIterator implements Iterator<ModelStatement> {
 
-		private Iterator<ModelStatement> iter;
+		private final Iterator<ModelStatement> iter;
 
-		private Set<ModelStatement> owner;
+		private final Set<ModelStatement> owner;
 
 		private ModelStatement last;
 
@@ -347,7 +349,7 @@ public class LinkedHashModel extends AbstractModel {
 
 		Set<ModelStatement> contexts = new LinkedHashSet<>();
 
-		private V value;
+		private final V value;
 
 		public ModelNode(V value) {
 			this.value = value;

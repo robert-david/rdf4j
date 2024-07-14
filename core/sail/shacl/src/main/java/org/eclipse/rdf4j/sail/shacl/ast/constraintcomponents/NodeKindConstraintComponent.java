@@ -1,13 +1,28 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Distribution License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *******************************************************************************/
+
 package org.eclipse.rdf4j.sail.shacl.ast.constraintcomponents;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
 import org.eclipse.rdf4j.sail.shacl.SourceConstraintComponent;
+import org.eclipse.rdf4j.sail.shacl.ast.StatementMatcher.Variable;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.FilterPlanNode;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.NodeKindFilter;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.PlanNode;
@@ -21,20 +36,24 @@ public class NodeKindConstraintComponent extends SimpleAbstractConstraintCompone
 	}
 
 	@Override
-	String getSparqlFilterExpression(String varName, boolean negated) {
+	String getSparqlFilterExpression(Variable<Value> variable, boolean negated) {
 		if (negated) {
-			return "(isIRI(?" + varName + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.IRI + ">, <"
+			return "(isIRI(" + variable.asSparqlVariable() + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.IRI + ">, <"
 					+ SHACL.BLANK_NODE_OR_IRI + ">, <" + SHACL.IRI_OR_LITERAL + "> ) ) ||\n" +
-					"\t\t(isLiteral(?" + varName + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.LITERAL + ">, " +
+					"(isLiteral(" + variable.asSparqlVariable() + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.LITERAL
+					+ ">, " +
 					"<" + SHACL.BLANK_NODE_OR_LITERAL + ">, <" + SHACL.IRI_OR_LITERAL + "> ) ) ||\n" +
-					"\t\t(isBlank(?" + varName + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.BLANK_NODE + ">, <"
+					"(isBlank(" + variable.asSparqlVariable() + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.BLANK_NODE
+					+ ">, <"
 					+ SHACL.BLANK_NODE_OR_IRI + ">, <" + SHACL.BLANK_NODE_OR_LITERAL + "> ) )";
 		} else {
-			return "!((isIRI(?" + varName + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.IRI + ">, <"
+			return "!((isIRI(" + variable.asSparqlVariable() + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.IRI + ">, <"
 					+ SHACL.BLANK_NODE_OR_IRI + ">, <" + SHACL.IRI_OR_LITERAL + "> ) ) ||\n" +
-					"\t\t(isLiteral(?" + varName + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.LITERAL + ">, " +
+					"(isLiteral(" + variable.asSparqlVariable() + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.LITERAL
+					+ ">, " +
 					"<" + SHACL.BLANK_NODE_OR_LITERAL + ">, <" + SHACL.IRI_OR_LITERAL + "> ) ) ||\n" +
-					"\t\t(isBlank(?" + varName + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.BLANK_NODE + ">, <"
+					"(isBlank(" + variable.asSparqlVariable() + ") && <" + nodeKind.iri + "> IN ( <" + SHACL.BLANK_NODE
+					+ ">, <"
 					+ SHACL.BLANK_NODE_OR_IRI + ">, <" + SHACL.BLANK_NODE_OR_LITERAL + "> ) ))";
 		}
 	}
@@ -69,7 +88,7 @@ public class NodeKindConstraintComponent extends SimpleAbstractConstraintCompone
 		IRIOrLiteral(SHACL.IRI_OR_LITERAL),
 		;
 
-		IRI iri;
+		private final IRI iri;
 
 		NodeKind(IRI iri) {
 			this.iri = iri;
@@ -85,4 +104,10 @@ public class NodeKindConstraintComponent extends SimpleAbstractConstraintCompone
 			throw new IllegalStateException("Unknown nodeKind: " + resource);
 		}
 	}
+
+	@Override
+	public List<Literal> getDefaultMessage() {
+		return List.of();
+	}
+
 }

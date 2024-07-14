@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.helpers;
 
@@ -23,6 +26,7 @@ public class RDFaParserSettings {
 	 * <p>
 	 * Defaults to {@link RDFaVersion#RDFA_1_0}.
 	 */
+	@Deprecated(since = "4.3.0", forRemoval = true)
 	public static final RioSetting<RDFaVersion> RDFA_COMPATIBILITY = new RioSettingImpl<>(
 			"org.eclipse.rdf4j.rio.rdfa.version", "RDFa Version Compatibility", RDFaVersion.RDFA_1_0);
 
@@ -36,6 +40,7 @@ public class RDFaParserSettings {
 	 *
 	 * @see <a href="http://www.w3.org/TR/2012/REC-rdfa-core-20120607/#s_vocab_expansion">RDFa Vocabulary Expansion</a>
 	 */
+	@Deprecated(since = "4.3.0", forRemoval = true)
 	public static final RioSetting<Boolean> VOCAB_EXPANSION_ENABLED = new BooleanRioSetting(
 			"org.eclipse.rdf4j.rio.rdfa.vocab_expansion", "Vocabulary Expansion", Boolean.FALSE);
 
@@ -49,7 +54,7 @@ public class RDFaParserSettings {
 	 *
 	 * @deprecated Use {@link BasicParserSettings#NAMESPACES}
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static final RioSetting<Boolean> FAIL_ON_RDFA_UNDEFINED_PREFIXES = new BooleanRioSetting(
 			"org.eclipse.rdf4j.rio.rdfa.allow_undefined_prefixes", "Allow RDFa Undefined Prefixes", Boolean.FALSE);
 

@@ -1,14 +1,17 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.nquads;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -49,13 +52,13 @@ public abstract class AbstractNQuadsParserUnitTest {
 	 * Constants *
 	 *-----------*/
 
-	private static String NQUADS_TEST_URL = "http://www.w3.org/2000/10/rdf-tests/rdfcore/ntriples/test.nt";
+	private static final String NQUADS_TEST_URL = "http://www.w3.org/2000/10/rdf-tests/rdfcore/ntriples/test.nt";
 
-	private static String NQUADS_TEST_FILE = "/testcases/nquads/test1.nq";
+	private static final String NQUADS_TEST_FILE = "/testcases/nquads/test1.nq";
 
-	private static String NTRIPLES_TEST_URL = "http://www.w3.org/2000/10/rdf-tests/rdfcore/ntriples/test.nt";
+	private static final String NTRIPLES_TEST_URL = "http://www.w3.org/2000/10/rdf-tests/rdfcore/ntriples/test.nt";
 
-	private static String NTRIPLES_TEST_FILE = "/testcases/ntriples/test.nt";
+	private static final String NTRIPLES_TEST_FILE = "/testcases/ntriples/test.nt";
 
 	private RDFParser parser;
 
@@ -279,7 +282,7 @@ public abstract class AbstractNQuadsParserUnitTest {
 		final ByteArrayInputStream bais = new ByteArrayInputStream(
 				("<http://www.v/dat/4b2-21> " + "<http://www.w3.org/20/ica#dtend> "
 						+ "\"2010\"^^<http://www.w3.org/2001/XMLSchema#integer> " + "<http://sin.siteserv.org/def/>.")
-								.getBytes());
+						.getBytes());
 		final TestRDFHandler rdfHandler = new TestRDFHandler();
 		parser.setRDFHandler(rdfHandler);
 		parser.parse(bais, "http://test.base.uri");
@@ -488,7 +491,7 @@ public abstract class AbstractNQuadsParserUnitTest {
 						+ "<http://dbpedia.org/property/mandatofine> "
 						+ "\"1380.0\"^^<http://www.w3.org/2001/XMLSchema#int> "
 						+ "<http://it.wikipedia.org/wiki/Camillo_Benso,_conte_di_Cavour#absolute-line=20> .")
-								.getBytes());
+						.getBytes());
 		parser.getParserConfig().set(BasicParserSettings.VERIFY_DATATYPE_VALUES, false);
 		parser.getParserConfig().set(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES, false);
 		parser.parse(bais, "http://base-uri");
@@ -503,7 +506,7 @@ public abstract class AbstractNQuadsParserUnitTest {
 						+ "<http://dbpedia.org/property/mandatofine> "
 						+ "\"1380.0\"^^<http://www.w3.org/2001/XMLSchema#int> "
 						+ "<http://it.wikipedia.org/wiki/Camillo_Benso,_conte_di_Cavour#absolute-line=20> .")
-								.getBytes());
+						.getBytes());
 		parser.getParserConfig().set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
 		parser.getParserConfig().set(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES, true);
 		try {
@@ -544,7 +547,7 @@ public abstract class AbstractNQuadsParserUnitTest {
 						// error.
 						"<http://s1> <http://p1> <http://o1> <http://g1> .\n").getBytes());
 
-		parser.getParserConfig().set(NTriplesParserSettings.FAIL_ON_NTRIPLES_INVALID_LINES, false);
+		parser.getParserConfig().set(NTriplesParserSettings.FAIL_ON_INVALID_LINES, false);
 
 		try {
 			parser.parse(bais, "http://test.base.uri");
@@ -566,8 +569,8 @@ public abstract class AbstractNQuadsParserUnitTest {
 		final TestRDFHandler rdfHandler = new TestRDFHandler();
 		parser.setRDFHandler(rdfHandler);
 
-		parser.getParserConfig().set(NTriplesParserSettings.FAIL_ON_NTRIPLES_INVALID_LINES, false);
-		parser.getParserConfig().addNonFatalError(NTriplesParserSettings.FAIL_ON_NTRIPLES_INVALID_LINES);
+		parser.getParserConfig().set(NTriplesParserSettings.FAIL_ON_INVALID_LINES, false);
+		parser.getParserConfig().addNonFatalError(NTriplesParserSettings.FAIL_ON_INVALID_LINES);
 
 		parser.parse(bais, "http://base-uri");
 		rdfHandler.assertHandler(2);
@@ -598,7 +601,7 @@ public abstract class AbstractNQuadsParserUnitTest {
 						+ "<http://dbpedia.org/property/mandatofine> "
 						+ "\"1380.0\"^^<http://dbpedia.org/invalid/datatype/second> "
 						+ "<http://it.wikipedia.org/wiki/Camillo_Benso,_conte_di_Cavour#absolute-line=20> .")
-								.getBytes());
+						.getBytes());
 		parser.parse(bais, "http://base-uri");
 		rdfHandler.assertHandler(1);
 	}
@@ -606,8 +609,8 @@ public abstract class AbstractNQuadsParserUnitTest {
 	private class TestParseLocationListener extends SimpleParseLocationListener {
 
 		private void assertListener(int row, int col) {
-			assertEquals("Unexpected last row", row, this.getLineNo());
-			assertEquals("Unexpected last col", col, this.getColumnNo());
+			assertEquals(row, this.getLineNo(), "Unexpected last row");
+			assertEquals(col, this.getColumnNo(), "Unexpected last col");
 		}
 
 	}
@@ -633,7 +636,7 @@ public abstract class AbstractNQuadsParserUnitTest {
 		public void assertHandler(int expected) {
 			assertTrue(started, "Never started.");
 			assertTrue(ended, "Never ended.");
-			assertEquals("Unexpected number of statements.", expected, getStatements().size());
+			assertEquals(expected, getStatements().size(), "Unexpected number of statements.");
 		}
 	}
 

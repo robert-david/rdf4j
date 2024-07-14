@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.elasticsearchstore;
 
@@ -50,6 +53,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
+import org.elasticsearch.index.reindex.DeleteByQueryRequestBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +70,8 @@ class ElasticsearchDataStructure implements DataStructureInterface {
 	private Set<ExtensibleStatement> addStatementBuffer = new HashSet<>();
 	private Set<ElasticsearchId> deleteStatementBuffer = new HashSet<>();
 
-	private final static ElasticsearchValueFactory vf = ElasticsearchValueFactory.getInstance();
+	private final static ElasticsearchValueFactory vf = (ElasticsearchValueFactory) ElasticsearchValueFactory
+			.getInstance();
 
 	static {
 		try {
@@ -141,7 +146,8 @@ class ElasticsearchDataStructure implements DataStructureInterface {
 	@Override
 	synchronized public void clear(boolean inferred, Resource[] contexts) {
 
-		BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(clientProvider.getClient())
+		BulkByScrollResponse response = new DeleteByQueryRequestBuilder(clientProvider.getClient(),
+				DeleteByQueryAction.INSTANCE)
 				.filter(getQueryBuilder(null, null, null, inferred, contexts))
 				.abortOnVersionConflict(false)
 				.source(index)
@@ -162,9 +168,9 @@ class ElasticsearchDataStructure implements DataStructureInterface {
 
 		QueryBuilder queryBuilder = getQueryBuilder(subject, predicate, object, inferred, context);
 
-		return new LookAheadIteration<ExtensibleStatement, SailException>() {
+		return new LookAheadIteration<>() {
 
-			CloseableIteration<SearchHit, RuntimeException> iterator = ElasticsearchHelper
+			final CloseableIteration<SearchHit, RuntimeException> iterator = ElasticsearchHelper
 					.getScrollingIterator(queryBuilder, clientProvider.getClient(), index, scrollTimeout);
 
 			@Override
@@ -596,7 +602,8 @@ class ElasticsearchDataStructure implements DataStructureInterface {
 
 		}
 
-		BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(clientProvider.getClient())
+		BulkByScrollResponse response = new DeleteByQueryRequestBuilder(clientProvider.getClient(),
+				DeleteByQueryAction.INSTANCE)
 				.filter(getQueryBuilder(subj, pred, obj, inferred, contexts))
 				.source(index)
 				.abortOnVersionConflict(false)

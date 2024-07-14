@@ -1,16 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.http.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -19,18 +22,18 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.Charsets;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -53,9 +56,9 @@ import org.eclipse.rdf4j.query.resultio.QueryResultIO;
 import org.eclipse.rdf4j.query.resultio.TupleQueryResultFormat;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -65,9 +68,9 @@ public class ProtocolIT {
 
 	private static TestServer server;
 
-	private static ValueFactory vf = SimpleValueFactory.getInstance();
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
-	@BeforeClass
+	@BeforeAll
 	public static void startServer() throws Exception {
 		server = new TestServer();
 		try {
@@ -78,7 +81,7 @@ public class ProtocolIT {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopServer() throws Exception {
 		server.stop();
 	}
@@ -142,13 +145,14 @@ public class ProtocolIT {
 	}
 
 	/**
-	 * Tests the server's methods for quering a repository using GET requests to send SeRQL-select queries.
+	 * Tests the server's methods for quering a repository using GET requests to send SPARQL-select queries.
 	 */
 	@Test
-	public void testSeRQLselect() throws Exception {
-		TupleQueryResult queryResult = evaluateTupleQuery(TestServer.REPOSITORY_URL, "select * from {X} P {Y}",
-				QueryLanguage.SERQL);
-		QueryResultIO.writeTuple(queryResult, TupleQueryResultFormat.SPARQL, System.out);
+	public void testSPARQLselect() throws Exception {
+		try (TupleQueryResult queryResult = evaluateTupleQuery(TestServer.REPOSITORY_URL, "select * where{ ?X ?P ?Y }",
+				QueryLanguage.SPARQL)) {
+			QueryResultIO.writeTuple(queryResult, TupleQueryResultFormat.SPARQL, System.out);
+		}
 	}
 
 	/**
@@ -203,7 +207,7 @@ public class ProtocolIT {
 		List<NameValuePair> nvps = new ArrayList<>();
 		nvps.add(new BasicNameValuePair(Protocol.UPDATE_PARAM_NAME, update));
 		nvps.add(new BasicNameValuePair(Protocol.TIMEOUT_PARAM_NAME, "1"));
-		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(nvps, Charsets.UTF_8);
+		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(nvps, StandardCharsets.UTF_8);
 
 		post.setEntity(entity);
 
@@ -221,7 +225,7 @@ public class ProtocolIT {
 	public void testContentTypeForGraphQuery1_GET() throws Exception {
 		String query = "DESCRIBE <foo:bar>";
 		String location = TestServer.REPOSITORY_URL;
-		location += "?query=" + URLEncoder.encode(query, "UTF-8");
+		location += "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
 
 		URL url = new URL(location);
 
@@ -263,7 +267,7 @@ public class ProtocolIT {
 	public void testContentTypeForGraphQuery2_GET() throws Exception {
 		String query = "DESCRIBE <foo:bar>";
 		String location = TestServer.REPOSITORY_URL;
-		location += "?query=" + URLEncoder.encode(query, "UTF-8");
+		location += "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
 
 		URL url = new URL(location);
 
@@ -292,7 +296,7 @@ public class ProtocolIT {
 	public void testQueryResponse_HEAD() throws Exception {
 		String query = "DESCRIBE <foo:bar>";
 		String location = TestServer.REPOSITORY_URL;
-		location += "?query=" + URLEncoder.encode(query, "UTF-8");
+		location += "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
 
 		URL url = new URL(location);
 
@@ -333,7 +337,7 @@ public class ProtocolIT {
 	public void testUpdateResponse_HEAD() throws Exception {
 		String query = "INSERT DATA { <foo:foo> <foo:bar> \"foo\". } ";
 		String location = Protocol.getStatementsLocation(TestServer.REPOSITORY_URL);
-		location += "?update=" + URLEncoder.encode(query, "UTF-8");
+		location += "?update=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
 
 		URL url = new URL(location);
 
@@ -376,7 +380,7 @@ public class ProtocolIT {
 		int limitCount = 1000;
 		int limitPrefix = 50;
 
-		Random prng = new Random();
+		Random prng = new Random(234235434);
 		// String repositoryLocation =
 		// Protocol.getRepositoryLocation("http://localhost:8080/openrdf-sesame",
 		// "Test-NativeStore");
@@ -417,7 +421,7 @@ public class ProtocolIT {
 		Set<Namespace> namespaceDeletions = Sets.difference(namespacesBefore, namespacesAfter);
 		Set<Namespace> namespaceAdditions = Sets.difference(namespacesAfter, namespacesBefore);
 
-		assertTrue("Some namespaces have been deleted", namespaceDeletions.isEmpty());
+		assertTrue(namespaceDeletions.isEmpty(), "Some namespaces have been deleted");
 		assertEquals(Sets.newHashSet(new SimpleNamespace("", "http://example.org/")), namespaceAdditions);
 	}
 
@@ -431,7 +435,7 @@ public class ProtocolIT {
 		int limitCount = 1000;
 		int limitPrefix = 50;
 
-		Random prng = new Random();
+		Random prng = new Random(234542434);
 
 		// String repositoryLocation =
 		// Protocol.getRepositoryLocation("http://localhost:8080/openrdf-sesame",
@@ -483,7 +487,7 @@ public class ProtocolIT {
 			}
 
 			try (CSVReader reader = new CSVReader(
-					new InputStreamReader(conn.getInputStream(), Charset.forName("UTF-8")))) {
+					new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
 				String[] headerRow = reader.readNext();
 
 				if (headerRow == null) {
@@ -518,13 +522,9 @@ public class ProtocolIT {
 		conn.setRequestMethod("PUT");
 		conn.setDoOutput(true);
 
-		try (InputStream dataStream = new ByteArrayInputStream(namespace.getBytes("UTF-8"))) {
-			OutputStream connOut = conn.getOutputStream();
-
-			try {
+		try (InputStream dataStream = new ByteArrayInputStream(namespace.getBytes(StandardCharsets.UTF_8))) {
+			try (OutputStream connOut = conn.getOutputStream()) {
 				IOUtil.transfer(dataStream, connOut);
-			} finally {
-				connOut.close();
 			}
 		}
 
@@ -572,12 +572,8 @@ public class ProtocolIT {
 		conn.setRequestProperty("Content-Type", dataFormat.getDefaultMIMEType());
 
 		try (InputStream dataStream = ProtocolIT.class.getResourceAsStream(file)) {
-			OutputStream connOut = conn.getOutputStream();
-
-			try {
-				IOUtil.transfer(dataStream, connOut);
-			} finally {
-				connOut.close();
+			try (OutputStream connOut = conn.getOutputStream()) {
+				IOUtil.transfer(Objects.requireNonNull(dataStream), connOut);
 			}
 		}
 
@@ -611,7 +607,7 @@ public class ProtocolIT {
 	}
 
 	private TupleQueryResult evaluateTupleQuery(String location, String query, QueryLanguage queryLn) throws Exception {
-		location += "?query=" + URLEncoder.encode(query, "UTF-8") + "&queryLn=" + queryLn.getName();
+		location += "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&queryLn=" + queryLn.getName();
 
 		URL url = new URL(location);
 
@@ -627,7 +623,7 @@ public class ProtocolIT {
 			// HTTP 200
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				// Process query results
-				return QueryResultIO.parseTuple(conn.getInputStream(), TupleQueryResultFormat.SPARQL);
+				return QueryResultIO.parseTuple(conn.getInputStream(), TupleQueryResultFormat.SPARQL, null);
 			} else {
 				String response = "location " + location + " responded: " + conn.getResponseMessage() + " ("
 						+ responseCode + ")";

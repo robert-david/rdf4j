@@ -1,15 +1,20 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.http.server;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import java.io.StringReader;
 
-import org.eclipse.rdf4j.IsolationLevels;
+import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.http.client.shacl.RemoteShaclValidationException;
 import org.eclipse.rdf4j.http.protocol.Protocol;
 import org.eclipse.rdf4j.model.Resource;
@@ -24,10 +29,10 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.http.HTTPRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.sail.shacl.ShaclSail;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TransactionSettingsIT {
 
@@ -35,7 +40,7 @@ public class TransactionSettingsIT {
 
 	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
-	@BeforeClass
+	@BeforeAll
 	public static void startServer() throws Exception {
 		server = new TestServer();
 		try {
@@ -46,7 +51,7 @@ public class TransactionSettingsIT {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopServer() throws Exception {
 		server.stop();
 	}
@@ -69,7 +74,7 @@ public class TransactionSettingsIT {
 			"        sh:path rdfs:label ;\n" +
 			"        sh:minCount 1 .";
 
-	@Before
+	@BeforeEach
 	public void before() {
 		Repository repository = new HTTPRepository(
 				Protocol.getRepositoryLocation(TestServer.SERVER_URL, TestServer.TEST_SHACL_REPO_ID));
@@ -101,7 +106,7 @@ public class TransactionSettingsIT {
 
 	}
 
-	@Test(expected = RemoteShaclValidationException.class)
+	@Test
 	public void testInvalid() throws Throwable {
 
 		Repository repository = new HTTPRepository(
@@ -113,17 +118,15 @@ public class TransactionSettingsIT {
 			connection.add(new StringReader(shacl), "", RDFFormat.TURTLE, RDF4J.SHACL_SHAPE_GRAPH);
 
 			connection.add(RDFS.RESOURCE, RDF.TYPE, RDFS.RESOURCE);
-			try {
-				connection.commit();
-			} catch (RepositoryException e) {
-				throw e.getCause();
-			}
+			assertThatExceptionOfType(RepositoryException.class)
+					.isThrownBy(() -> connection.commit())
+					.withCauseInstanceOf(RemoteShaclValidationException.class);
 
 		}
 
 	}
 
-	@Test(expected = RemoteShaclValidationException.class)
+	@Test
 	public void testInvalidSnapshot() throws Throwable {
 
 		Repository repository = new HTTPRepository(
@@ -135,11 +138,9 @@ public class TransactionSettingsIT {
 			connection.add(new StringReader(shacl), "", RDFFormat.TURTLE, RDF4J.SHACL_SHAPE_GRAPH);
 
 			connection.add(RDFS.RESOURCE, RDF.TYPE, RDFS.RESOURCE);
-			try {
-				connection.commit();
-			} catch (RepositoryException e) {
-				throw e.getCause();
-			}
+			assertThatExceptionOfType(RepositoryException.class)
+					.isThrownBy(() -> connection.commit())
+					.withCauseInstanceOf(RemoteShaclValidationException.class);
 
 		}
 
@@ -174,7 +175,7 @@ public class TransactionSettingsIT {
 
 	}
 
-	@Test(expected = RemoteShaclValidationException.class)
+	@Test
 	public void testValidationDisabled() throws Throwable {
 
 		Repository repository = new HTTPRepository(
@@ -192,11 +193,9 @@ public class TransactionSettingsIT {
 			connection.begin(ShaclSail.TransactionSettings.ValidationApproach.Bulk, IsolationLevels.SNAPSHOT);
 			try (RepositoryConnection connection1 = repository.getConnection()) {
 
-				try {
-					connection.commit();
-				} catch (RepositoryException e) {
-					throw e.getCause();
-				}
+				assertThatExceptionOfType(RepositoryException.class)
+						.isThrownBy(() -> connection.commit())
+						.withCauseInstanceOf(RemoteShaclValidationException.class);
 			}
 
 		}

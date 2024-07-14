@@ -1,13 +1,16 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.query.algebra.evaluation.util;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,45 +23,45 @@ import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author james
  */
 public class LiteralComparatorTest {
 
-	private ValueFactory vf = SimpleValueFactory.getInstance();
+	private final ValueFactory vf = SimpleValueFactory.getInstance();
 
-	private Literal one = vf.createLiteral(1);
+	private final Literal one = vf.createLiteral(1);
 
-	private Literal ten = vf.createLiteral(10);
+	private final Literal ten = vf.createLiteral(10);
 
-	private Literal a = vf.createLiteral("a");
+	private final Literal a = vf.createLiteral("a");
 
-	private Literal b = vf.createLiteral("b");
+	private final Literal b = vf.createLiteral("b");
 
-	private Literal la = vf.createLiteral("a", "en");
+	private final Literal la = vf.createLiteral("a", "en");
 
-	private Literal lb = vf.createLiteral("b", "en");
+	private final Literal lb = vf.createLiteral("b", "en");
 
-	private Literal lf = vf.createLiteral("a", "fr");
+	private final Literal lf = vf.createLiteral("a", "fr");
 
-	private Literal f = vf.createLiteral(false);
+	private final Literal f = vf.createLiteral(false);
 
-	private Literal t = vf.createLiteral(true);
+	private final Literal t = vf.createLiteral(true);
 
 	private Literal date1;
 
 	private Literal date2;
 
-	private Literal simple1 = vf.createLiteral("http://script.example/Latin");
+	private final Literal simple1 = vf.createLiteral("http://script.example/Latin");
 
-	private Literal simple2 = vf.createLiteral("http://script.example/Кириллица");
+	private final Literal simple2 = vf.createLiteral("http://script.example/Кириллица");
 
-	private Literal typed1 = vf.createLiteral("http://script.example/Latin", XSD.STRING);
+	private final Literal typed1 = vf.createLiteral("http://script.example/Latin", XSD.STRING);
 
-	private ValueComparator cmp = new ValueComparator();
+	private final ValueComparator cmp = new ValueComparator();
 
 	@Test
 	public void testNumeric() throws Exception {
@@ -135,7 +138,7 @@ public class LiteralComparatorTest {
 		assertTrue(list.indexOf(nine) < list.indexOf(ten));
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		DatatypeFactory factory = DatatypeFactory.newInstance();
 		XMLGregorianCalendar mar = factory.newXMLGregorianCalendar("2000-03-04T20:00:00Z");

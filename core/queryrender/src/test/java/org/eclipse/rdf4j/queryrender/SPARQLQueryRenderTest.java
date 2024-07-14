@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Eclipse RDF4J contributors.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Distribution License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *******************************************************************************/
 package org.eclipse.rdf4j.queryrender;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -221,6 +231,19 @@ public class SPARQLQueryRenderTest {
 		String expected = sb.toString();
 
 		executeRenderTest(query, expected);
+	}
+
+	@Test
+	public void renderConstruct() throws Exception {
+		StringBuffer sb = new StringBuffer();
+		sb.append("construct  {").append(lineSeparator);
+		sb.append("  ?s ?p ?o.").append(lineSeparator);
+		sb.append("}").append(lineSeparator);
+		sb.append("where {").append(lineSeparator);
+		sb.append("  ?s ?p ?o.").append(lineSeparator);
+		sb.append("}");
+		String query = sb.toString();
+		executeRenderTest(query, query);
 	}
 
 	@Test

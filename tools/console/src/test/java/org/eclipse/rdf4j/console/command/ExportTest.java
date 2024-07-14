@@ -1,21 +1,26 @@
 /*******************************************************************************
  * Copyright (c) 2018 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.console.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
-import org.eclipse.rdf4j.RDF4JException;
+import org.eclipse.rdf4j.common.exception.RDF4JException;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.manager.LocalRepositoryManager;
@@ -52,8 +57,11 @@ public class ExportTest extends AbstractCommandTest {
 	public final void testExportAll() throws RepositoryException, IOException {
 		File nq = new File(locationFile, "all.nq");
 		cmd.execute("export", nq.getAbsolutePath());
-		Model exp = Rio.parse(Files.newReader(nq, StandardCharsets.UTF_8), "http://example.com", RDFFormat.NQUADS);
-
+		Model exp;
+		try (Reader reader = Files.newReader(nq, StandardCharsets.UTF_8)) {
+			exp = Rio.parse(reader, "http://example.com", RDFFormat.NQUADS);
+		}
+		assertNotNull(exp);
 		assertTrue(nq.length() > 0, "File is empty");
 		assertEquals(3, exp.contexts().size(), "Number of contexts incorrect");
 
@@ -66,8 +74,11 @@ public class ExportTest extends AbstractCommandTest {
 
 		File nq = new File(locationFile, "all.nq");
 		cmd.execute("export", nq.getName());
-		Model exp = Rio.parse(Files.newReader(nq, StandardCharsets.UTF_8), "http://example.com", RDFFormat.NQUADS);
-
+		Model exp;
+		try (Reader reader = Files.newReader(nq, StandardCharsets.UTF_8)) {
+			exp = Rio.parse(reader, "http://example.com", RDFFormat.NQUADS);
+		}
+		assertNotNull(exp);
 		assertTrue(nq.length() > 0, "File is empty");
 		assertEquals(3, exp.contexts().size(), "Number of contexts incorrect");
 	}
@@ -76,10 +87,12 @@ public class ExportTest extends AbstractCommandTest {
 	public final void testExportContexts() throws RepositoryException, IOException {
 		File nq = new File(locationFile, "default.nq");
 		cmd.execute("export", nq.getAbsolutePath(), "null", "http://example.org/ns/context/resurrection");
-		Model exp = Rio.parse(Files.newReader(nq, StandardCharsets.UTF_8), "http://example.com", RDFFormat.NQUADS);
-
+		Model exp;
+		try (Reader reader = Files.newReader(nq, StandardCharsets.UTF_8)) {
+			exp = Rio.parse(reader, "http://example.com", RDFFormat.NQUADS);
+		}
+		assertNotNull(exp);
 		assertTrue(nq.length() > 0, "File is empty");
-
 		assertEquals(2, exp.contexts().size(), "Number of contexts incorrect");
 		assertEquals(4, exp.size(), "Number of triples incorrect");
 	}

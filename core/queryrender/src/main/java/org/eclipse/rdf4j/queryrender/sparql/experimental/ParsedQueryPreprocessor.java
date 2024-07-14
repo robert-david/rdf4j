@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.queryrender.sparql.experimental;
 
@@ -55,7 +58,6 @@ import org.eclipse.rdf4j.query.algebra.Label;
 import org.eclipse.rdf4j.query.algebra.Lang;
 import org.eclipse.rdf4j.query.algebra.LangMatches;
 import org.eclipse.rdf4j.query.algebra.LeftJoin;
-import org.eclipse.rdf4j.query.algebra.Like;
 import org.eclipse.rdf4j.query.algebra.Load;
 import org.eclipse.rdf4j.query.algebra.LocalName;
 import org.eclipse.rdf4j.query.algebra.MathExpr;
@@ -104,17 +106,16 @@ import com.google.common.collect.Lists;
  * A query visitor that parses the incoming query or TupleExpr and collects meta-level information that is later used by
  * the {@link SparqlQueryRenderer} (e.g., information about the included subquery, all group, order, and slice
  * operations etc.).
- * 
+ *
  * @author Andriy Nikolov
  * @author Jeen Broekstra
  * @author Andreas Schwarte
- *
  */
 class ParsedQueryPreprocessor extends AbstractQueryModelVisitor<RuntimeException> {
 
-	public Map<Projection, SerializableParsedTupleQuery> queriesByProjection = new HashMap<Projection, SerializableParsedTupleQuery>();
+	public Map<Projection, SerializableParsedTupleQuery> queriesByProjection = new HashMap<>();
 
-	public Stack<SerializableParsedTupleQuery> queryProfilesStack = new Stack<SerializableParsedTupleQuery>();
+	public Stack<SerializableParsedTupleQuery> queryProfilesStack = new Stack<>();
 
 	public SerializableParsedTupleQuery currentQueryProfile = new SerializableParsedTupleQuery();
 
@@ -129,7 +130,7 @@ class ParsedQueryPreprocessor extends AbstractQueryModelVisitor<RuntimeException
 
 	/**
 	 * Processes the incoming parsed query collecting the information required for rendering.
-	 * 
+	 *
 	 * @param query standard {@link ParsedTupleQuery}
 	 * @return {@link SerializableParsedTupleQuery} containing the original query and the required additional
 	 *         information.
@@ -151,7 +152,11 @@ class ParsedQueryPreprocessor extends AbstractQueryModelVisitor<RuntimeException
 	}
 
 	public SerializableParsedConstructQuery transformToSerialize(ParsedGraphQuery query) {
-		query.getTupleExpr().visit(this);
+		TupleExpr tupleExpr = query.getTupleExpr();
+		if (tupleExpr instanceof QueryRoot) {
+			tupleExpr = ((QueryRoot) tupleExpr).getArg();
+		}
+		tupleExpr.visit(this);
 
 		for (SerializableParsedTupleQuery tmp : this.queriesByProjection.values()) {
 			cleanBindingSetAssignments(tmp);
@@ -219,19 +224,23 @@ class ParsedQueryPreprocessor extends AbstractQueryModelVisitor<RuntimeException
 
 	/**
 	 * Processes the incoming parsed ASK query collecting the information required for rendering.
-	 * 
+	 *
 	 * @param query standard {@link ParsedBooleanQuery}
 	 * @return {@link SerializableParsedBooleanQuery} containing the original query and the required additional
 	 *         information.
 	 */
 	public SerializableParsedBooleanQuery transformToSerialize(ParsedBooleanQuery query) {
-		if (!(query.getTupleExpr() instanceof Slice)) {
+		TupleExpr tupleExpr = query.getTupleExpr();
+		if (tupleExpr instanceof QueryRoot) {
+			tupleExpr = ((QueryRoot) tupleExpr).getArg();
+		}
+		if (!(tupleExpr instanceof Slice)) {
 			throw new IllegalArgumentException(
 					"Unexpected boolean query: Slice expected as a root element, was "
-							+ query.getTupleExpr().getSignature());
+							+ tupleExpr.getSignature());
 		}
 
-		Slice queryRoot = (Slice) query.getTupleExpr().clone();
+		Slice queryRoot = (Slice) tupleExpr.clone();
 
 		TupleExpr whereClause = queryRoot.getArg();
 
@@ -260,7 +269,7 @@ class ParsedQueryPreprocessor extends AbstractQueryModelVisitor<RuntimeException
 
 	/**
 	 * Processes the incoming parsed {@link TupleExpr} collecting the information required for rendering.
-	 * 
+	 *
 	 * @param tupleExpr standard {@link TupleExpr}
 	 * @return {@link SerializableParsedTupleQuery} containing the original query and the required additional
 	 *         information.
@@ -593,11 +602,6 @@ class ParsedQueryPreprocessor extends AbstractQueryModelVisitor<RuntimeException
 		if (currentQueryProfile.whereClause == null) {
 			currentQueryProfile.whereClause = node;
 		}
-		super.meet(node);
-	}
-
-	@Override
-	public void meet(Like node) throws RuntimeException {
 		super.meet(node);
 	}
 

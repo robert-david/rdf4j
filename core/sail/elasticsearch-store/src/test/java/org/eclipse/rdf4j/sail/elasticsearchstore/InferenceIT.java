@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.elasticsearchstore;
@@ -12,12 +15,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
-import org.assertj.core.util.Files;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -27,80 +26,35 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
 import org.eclipse.rdf4j.sail.inferencer.fc.SchemaCachingRDFSInferencer;
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
-
-public class InferenceIT {
+public class InferenceIT extends AbstractElasticsearchStoreIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(ElasticsearchStoreIT.class);
+
 	private static final SimpleValueFactory vf = SimpleValueFactory.getInstance();
 
-	private static EmbeddedElastic embeddedElastic;
 	private static SingletonClientProvider singletonClientProvider;
 
-	private static File installLocation = Files.newTemporaryFolder();
-
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws IOException, InterruptedException {
-
-		embeddedElastic = TestHelpers.startElasticsearch(installLocation);
-
-		singletonClientProvider = new SingletonClientProvider("localhost",
-				embeddedElastic.getTransportTcpPort(), "cluster1");
+		TestHelpers.openClient();
+		singletonClientProvider = new SingletonClientProvider("localhost", TestHelpers.PORT, TestHelpers.CLUSTER);
 	}
 
-	@AfterClass
-	public static void afterClass() throws Exception {
+	@AfterAll
+	public static void afterClassSingleton() throws Exception {
 		singletonClientProvider.close();
-		TestHelpers.stopElasticsearch(embeddedElastic, installLocation);
-	}
-
-	@After
-	public void after() {
-		embeddedElastic.refreshIndices();
-		deleteAllIndexes();
-	}
-
-	private void deleteAllIndexes() {
-		for (String index : getIndexes()) {
-			System.out.println("deleting: " + index);
-			embeddedElastic.deleteIndex(index);
-
-		}
-	}
-
-	private String[] getIndexes() {
-
-		Settings settings = Settings.builder().put("cluster.name", "cluster1").build();
-		try (TransportClient client = new PreBuiltTransportClient(settings)) {
-			client.addTransportAddress(
-					new TransportAddress(InetAddress.getByName("localhost"), embeddedElastic.getTransportTcpPort()));
-
-			return client.admin()
-					.indices()
-					.getIndex(new GetIndexRequest())
-					.actionGet()
-					.getIndices();
-		} catch (UnknownHostException e) {
-			throw new IllegalStateException(e);
-		}
-
+		TestHelpers.closeClient();
 	}
 
 	@Test
 	public void initiallyInferredStatementsTest() {
-		ElasticsearchStore elasticsearchStore = new ElasticsearchStore(singletonClientProvider, "testindex");
+		ElasticsearchStore elasticsearchStore = new ElasticsearchStore(singletonClientProvider, "testindex1");
 
 		SailRepository sailRepository = new SailRepository(new SchemaCachingRDFSInferencer(elasticsearchStore));
 
@@ -117,7 +71,7 @@ public class InferenceIT {
 
 	@Test
 	public void simpleInferenceTest() {
-		ElasticsearchStore elasticsearchStore = new ElasticsearchStore(singletonClientProvider, "testindex");
+		ElasticsearchStore elasticsearchStore = new ElasticsearchStore(singletonClientProvider, "testindex2");
 
 		SailRepository sailRepository = new SailRepository(new SchemaCachingRDFSInferencer(elasticsearchStore));
 
@@ -138,7 +92,7 @@ public class InferenceIT {
 
 	@Test
 	public void removeInferredData() {
-		ElasticsearchStore elasticsearchStore = new ElasticsearchStore(singletonClientProvider, "testindex");
+		ElasticsearchStore elasticsearchStore = new ElasticsearchStore(singletonClientProvider, "testindex3");
 
 		SailRepository sailRepository = new SailRepository(new SchemaCachingRDFSInferencer(elasticsearchStore));
 
@@ -172,7 +126,7 @@ public class InferenceIT {
 
 	@Test
 	public void addInferredStatement() {
-		ElasticsearchStore elasticsearchStore = new ElasticsearchStore(singletonClientProvider, "testindex");
+		ElasticsearchStore elasticsearchStore = new ElasticsearchStore(singletonClientProvider, "testindex4");
 
 		SailRepository sailRepository = new SailRepository(new SchemaCachingRDFSInferencer(elasticsearchStore));
 

@@ -1,58 +1,45 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.elasticsearchstore.compliance;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.assertj.core.util.Files;
-import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.IsolationLevels;
+import org.eclipse.rdf4j.common.transaction.IsolationLevel;
+import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnectionTest;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.elasticsearchstore.ElasticsearchStore;
 import org.eclipse.rdf4j.sail.elasticsearchstore.SingletonClientProvider;
 import org.eclipse.rdf4j.sail.elasticsearchstore.TestHelpers;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.runners.Parameterized;
-
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
+import org.eclipse.rdf4j.testsuite.repository.RepositoryConnectionTest;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 public class ElasticsearchStoreConnectionIT extends RepositoryConnectionTest {
 
-	public ElasticsearchStoreConnectionIT(IsolationLevel level) {
-		super(level);
-	}
-
-	private static EmbeddedElastic embeddedElastic;
-
-	private static File installLocation = Files.newTemporaryFolder();
 	private static SingletonClientProvider clientPool;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws IOException, InterruptedException {
-
-		embeddedElastic = TestHelpers.startElasticsearch(installLocation);
-		clientPool = new SingletonClientProvider("localhost", embeddedElastic.getTransportTcpPort(), "cluster1");
-
+		TestHelpers.openClient();
+		clientPool = new SingletonClientProvider("localhost", TestHelpers.PORT, TestHelpers.CLUSTER);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
-
 		clientPool.close();
-		TestHelpers.stopElasticsearch(embeddedElastic, installLocation);
-
+		TestHelpers.closeClient();
 	}
 
-	@Parameterized.Parameters(name = "{0}")
 	public static IsolationLevel[] parameters() {
 		return new IsolationLevel[] {
 				IsolationLevels.NONE,
@@ -62,7 +49,7 @@ public class ElasticsearchStoreConnectionIT extends RepositoryConnectionTest {
 	}
 
 	@Override
-	protected Repository createRepository() {
+	protected Repository createRepository(File f) {
 		return new SailRepository(
 				new ElasticsearchStore(clientPool, "index1"));
 	}

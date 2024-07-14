@@ -1,50 +1,41 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.elasticsearchstore.compliance;
 
-import java.io.File;
 import java.io.IOException;
 
-import org.assertj.core.util.Files;
 import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryTest;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.elasticsearchstore.ElasticsearchStore;
 import org.eclipse.rdf4j.sail.elasticsearchstore.SingletonClientProvider;
 import org.eclipse.rdf4j.sail.elasticsearchstore.TestHelpers;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
+import org.eclipse.rdf4j.testsuite.repository.RepositoryTest;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 
 public class ElasticsearchStoreRepositoryIT extends RepositoryTest {
 
-	private static EmbeddedElastic embeddedElastic;
-
-	private static File installLocation = Files.newTemporaryFolder();
-
 	private static SingletonClientProvider clientPool;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws IOException, InterruptedException {
-
-		embeddedElastic = TestHelpers.startElasticsearch(installLocation);
-		clientPool = new SingletonClientProvider("localhost", embeddedElastic.getTransportTcpPort(), "cluster1");
-
+		TestHelpers.openClient();
+		clientPool = new SingletonClientProvider("localhost", TestHelpers.PORT, TestHelpers.CLUSTER);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
-
 		clientPool.close();
-		TestHelpers.stopElasticsearch(embeddedElastic, installLocation);
-
+		TestHelpers.closeClient();
 	}
 
 	@Override
@@ -54,7 +45,7 @@ public class ElasticsearchStoreRepositoryIT extends RepositoryTest {
 		return sailRepository;
 	}
 
-	@Ignore
+	@Disabled
 	@Override
 	public void testShutdownFollowedByInit() throws Exception {
 		// ignore test

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.helpers;
 
@@ -25,7 +28,10 @@ public class RDFJSONWriterSettings {
 	 * Defaults to false.
 	 * <p>
 	 * Can be overridden by setting system property {@code org.eclipse.rdf4j.rio.rdfjson.allow_multiple_object_values}.
+	 *
+	 * @deprecated Use {@link org.eclipse.rdf4j.rio.rdfjson.RDFJSONWriterSettings#ALLOW_MULTIPLE_OBJECT_VALUES} instead.
 	 */
+	@Deprecated(since = "4.3.0", forRemoval = true)
 	public static final RioSetting<Boolean> ALLOW_MULTIPLE_OBJECT_VALUES = new BooleanRioSetting(
 			"org.eclipse.rdf4j.rio.rdfjson.allow_multiple_object_values", "Allow multiple object values",
 			Boolean.FALSE);

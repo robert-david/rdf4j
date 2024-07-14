@@ -1,11 +1,16 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.shacl;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,29 +22,20 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.sail.nativerdf.NativeStore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class NativeStoreTest {
-	@Rule
-	public TemporaryFolder tempDir = new TemporaryFolder();
 
 	@Test
-	public void testEmpty() throws IOException {
-
-		File file = tempDir.newFolder();
-
+	public void testEmpty(@TempDir File file) throws IOException {
 		SailRepository shaclSail = new SailRepository(new ShaclSail(new NativeStore(file)));
 		shaclSail.init();
-
 		shaclSail.shutDown();
 	}
 
-	@Test(expected = ShaclSailValidationException.class)
-	public void testPersistedShapes() throws Throwable {
-
-		File file = tempDir.newFolder();
+	@Test
+	public void testPersistedShapes(@TempDir File file) throws Throwable {
 
 		SailRepository shaclSail = new SailRepository(new ShaclSail(new NativeStore(file)));
 		shaclSail.init();
@@ -61,16 +57,17 @@ public class NativeStoreTest {
 
 			));
 
-			connection.add(invalidSampleData, "", RDFFormat.TURTLE);
-			try {
-				connection.commit();
-			} catch (RepositoryException exception) {
-				throw exception.getCause();
+			connection.add(invalidSampleData, "", RDFFormat.TRIG);
 
-			}
-		}
+			assertThrows(ShaclSailValidationException.class, () -> {
+				try {
+					connection.commit();
+				} catch (RepositoryException exception) {
+					throw exception.getCause();
+				}
+			});
 
-		finally {
+		} finally {
 			shaclSail.shutDown();
 		}
 	}
@@ -90,7 +87,7 @@ public class NativeStoreTest {
 					"ex:PersonShapeProperty ", "  sh:path foaf:age ;", "  sh:datatype xsd:int ;", "  sh:maxCount 1 ;",
 					"  sh:minCount 1 ."));
 
-			connection.add(shaclRules, "", RDFFormat.TURTLE, RDF4J.SHACL_SHAPE_GRAPH);
+			connection.add(shaclRules, "", RDFFormat.TRIG, RDF4J.SHACL_SHAPE_GRAPH);
 			connection.commit();
 
 		}

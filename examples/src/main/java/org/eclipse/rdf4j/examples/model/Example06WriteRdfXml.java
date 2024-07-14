@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.examples.model;
 
@@ -19,7 +22,7 @@ import org.eclipse.rdf4j.rio.Rio;
 
 /**
  * RDF Tutorial example 06: Writing an RDF model in RDF/XML syntax
- *
+ * <p>
  * In this example, we show how you can use the Rio Parser/writer toolkit to write your model in RDF/XML syntax.
  *
  * @author Jeen Broekstra

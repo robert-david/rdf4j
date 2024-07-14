@@ -1,16 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.trix;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -24,9 +27,9 @@ import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.rio.helpers.XMLParserSettings;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TriXParserTest {
 
@@ -40,7 +43,7 @@ public class TriXParserTest {
 
 	private Locale platformLocale;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		platformLocale = Locale.getDefault();
 
@@ -53,7 +56,7 @@ public class TriXParserTest {
 		parser.setParseErrorListener(el);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		Locale.setDefault(platformLocale);
 	}
@@ -64,7 +67,7 @@ public class TriXParserTest {
 		parser.getParserConfig().set(XMLParserSettings.DISALLOW_DOCTYPE_DECL, true);
 
 		try (final InputStream in = this.getClass()
-				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/trix-xxe-external-entity.trix");) {
+				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/trix-xxe-external-entity.trix")) {
 			parser.parse(in, "");
 		} catch (RDFParseException e) {
 			assertEquals(
@@ -83,7 +86,7 @@ public class TriXParserTest {
 	@Test
 	public void testIgnoreExternalDTD_default() throws Exception {
 		try (final InputStream in = this.getClass()
-				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/trix-xxe-external-dtd.trix");) {
+				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/trix-xxe-external-dtd.trix")) {
 			parser.parse(in, "");
 		} catch (FileNotFoundException e) {
 			fail("parser tried to read external DTD");
@@ -116,7 +119,7 @@ public class TriXParserTest {
 	@Test
 	public void testIgnoreExternalGeneralEntity() throws Exception {
 		try (final InputStream in = this.getClass()
-				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/trix-xxe-external-entity.trix");) {
+				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/trix-xxe-external-entity.trix")) {
 			parser.parse(in, "");
 		} catch (FileNotFoundException e) {
 			fail("parser tried to read external file from external general entity");
@@ -140,7 +143,7 @@ public class TriXParserTest {
 		parser.getParserConfig().set(XMLParserSettings.DISALLOW_DOCTYPE_DECL, false);
 
 		try (final InputStream in = this.getClass()
-				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/trix-xxe-external-param-entity.trix");) {
+				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/trix-xxe-external-param-entity.trix")) {
 			parser.parse(in, "");
 		} catch (FileNotFoundException e) {
 			fail("parser tried to read external file from external parameter entity");
@@ -153,7 +156,7 @@ public class TriXParserTest {
 	@Test
 	public void testFatalErrorPrologContent() throws Exception {
 		try (final InputStream in = this.getClass()
-				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/not-a-trix-file.trix");) {
+				.getResourceAsStream("/org/eclipse/rdf4j/rio/trix/not-a-trix-file.trix")) {
 			parser.parse(in, "");
 		} catch (RDFParseException e) {
 			assertEquals("Content is not allowed in prolog. [line 1, column 1]", e.getMessage());

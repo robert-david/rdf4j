@@ -1,16 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Distribution License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *******************************************************************************/
+
 package org.eclipse.rdf4j.sail.shacl.ast.constraintcomponents;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.sail.shacl.ShaclSail;
 import org.eclipse.rdf4j.sail.shacl.SourceConstraintComponent;
 import org.eclipse.rdf4j.sail.shacl.ast.Cache;
 import org.eclipse.rdf4j.sail.shacl.ast.NodeShape;
@@ -19,21 +28,22 @@ import org.eclipse.rdf4j.sail.shacl.ast.ShaclAstLists;
 import org.eclipse.rdf4j.sail.shacl.ast.ShaclProperties;
 import org.eclipse.rdf4j.sail.shacl.ast.Shape;
 import org.eclipse.rdf4j.sail.shacl.ast.targets.TargetChain;
+import org.eclipse.rdf4j.sail.shacl.wrapper.shape.ShapeSource;
 
 public class XoneConstraintComponent extends AbstractConstraintComponent {
-	List<Shape> xone;
+	private List<Shape> xone;
 
-	public XoneConstraintComponent(Resource id, RepositoryConnection connection,
-			Cache cache, ShaclSail shaclSail) {
+	public XoneConstraintComponent(Resource id, ShapeSource shapeSource, Shape.ParseSettings parseSettings,
+			Cache cache) {
 		super(id);
-		xone = ShaclAstLists.toList(connection, id, Resource.class)
+		xone = ShaclAstLists.toList(shapeSource, id, Resource.class)
 				.stream()
-				.map(r -> new ShaclProperties(r, connection))
+				.map(r -> new ShaclProperties(r, shapeSource))
 				.map(p -> {
 					if (p.getType() == SHACL.NODE_SHAPE) {
-						return NodeShape.getInstance(p, connection, cache, false, shaclSail);
+						return NodeShape.getInstance(p, shapeSource, parseSettings, cache);
 					} else if (p.getType() == SHACL.PROPERTY_SHAPE) {
-						return PropertyShape.getInstance(p, connection, cache, shaclSail);
+						return PropertyShape.getInstance(p, shapeSource, parseSettings, cache);
 					}
 					throw new IllegalStateException("Unknown shape type for " + p.getId());
 				})
@@ -67,10 +77,6 @@ public class XoneConstraintComponent extends AbstractConstraintComponent {
 		}
 	}
 
-	public List<Shape> getXone() {
-		return Collections.unmodifiableList(xone);
-	}
-
 	@Override
 	public SourceConstraintComponent getConstraintComponent() {
 		return SourceConstraintComponent.XoneConstraintComponent;
@@ -85,5 +91,14 @@ public class XoneConstraintComponent extends AbstractConstraintComponent {
 				.map(a -> ((Shape) a))
 				.collect(Collectors.toList());
 		return constraintComponent;
+	}
+
+	@Override
+	public List<Literal> getDefaultMessage() {
+		return List.of();
+	}
+
+	public List<Shape> getXone() {
+		return xone;
 	}
 }

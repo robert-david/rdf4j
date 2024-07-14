@@ -1,14 +1,17 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.jsonld;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,8 +38,8 @@ import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.helpers.JSONLDMode;
 import org.eclipse.rdf4j.rio.helpers.JSONLDSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Peter Ansell
@@ -64,12 +67,13 @@ public class JSONLDWriterBackgroundTest extends RDFWriterTest {
 	protected Model parse(InputStream reader, String baseURI)
 			throws RDFParseException, RDFHandlerException, IOException {
 		return QueryResults
-				.asModel(QueryResults.parseGraphBackground(reader, baseURI, rdfParserFactory.getRDFFormat()));
+				.asModel(QueryResults.parseGraphBackground(reader, baseURI, rdfParserFactory.getRDFFormat(),
+						null));
 	}
 
 	@Test
 	@Override
-	@Ignore("TODO: Determine why this test is breaking")
+	@Disabled("TODO: Determine why this test is breaking")
 	public void testIllegalPrefix() throws RDFHandlerException, RDFParseException, IOException {
 	}
 
@@ -102,13 +106,13 @@ public class JSONLDWriterBackgroundTest extends RDFWriterTest {
 
 		rdfParser.parse(in, "foo:bar");
 
-		assertEquals("Unexpected number of statements, found " + model.size(), 1, model.size());
+		assertEquals(1, model.size(), "Unexpected number of statements, found " + model.size());
 
-		assertTrue("missing namespaced statement", model.contains(st1));
+		assertTrue(model.contains(st1), "missing namespaced statement");
 
 		if (rdfParser.getRDFFormat().supportsNamespaces()) {
-			assertTrue("Expected at least one namespace, found " + model.getNamespaces().size(),
-					model.getNamespaces().size() >= 1);
+			assertTrue(model.getNamespaces().size() >= 1,
+					"Expected at least one namespace, found " + model.getNamespaces().size());
 			assertEquals(exNs, model.getNamespace("ex").get().getName());
 		}
 	}

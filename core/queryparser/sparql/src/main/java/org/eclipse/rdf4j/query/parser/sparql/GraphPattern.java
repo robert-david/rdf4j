@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.query.parser.sparql;
 
@@ -29,7 +32,6 @@ import org.eclipse.rdf4j.query.algebra.Var;
  * A graph pattern consisting of (required and optional) tuple expressions, binding assignments and boolean constraints.
  *
  * @author Arjohn Kampman
- *
  * @apiNote This feature is for internal use only: its existence, signature or behavior may change without warning from
  *          one release to the next.
  */
@@ -49,13 +51,13 @@ public class GraphPattern {
 	/**
 	 * The required tuple expressions in this graph pattern.
 	 */
-	private List<TupleExpr> requiredTEs = new ArrayList<>();
+	private final List<TupleExpr> requiredTEs = new ArrayList<>();
 
 	/**
 	 * The optional tuple expressions in this graph pattern, as a list of Key-Value pairs with the tuple expression as
 	 * the key and a list of constraints applicable to the tuple expression as the value.
 	 */
-	private List<Map.Entry<TupleExpr, List<ValueExpr>>> optionalTEs = new ArrayList<>();
+	private final List<Map.Entry<TupleExpr, List<ValueExpr>>> optionalTEs = new ArrayList<>();
 
 	/**
 	 * The boolean constraints in this graph pattern.
@@ -96,8 +98,17 @@ public class GraphPattern {
 		requiredTEs.add(te);
 	}
 
+	/**
+	 * Remove all values for required tuple expressions in this {@link GraphPattern}
+	 */
+	void clearRequiredTEs() {
+		requiredTEs.clear();
+	}
+
 	public void addRequiredSP(Var subjVar, Var predVar, Var objVar) {
-		addRequiredTE(new StatementPattern(spScope, subjVar, predVar, objVar, contextVar));
+
+		addRequiredTE(new StatementPattern(spScope, subjVar, predVar, objVar,
+				contextVar != null ? contextVar.clone() : null));
 	}
 
 	public List<TupleExpr> getRequiredTEs() {
@@ -160,18 +171,7 @@ public class GraphPattern {
 	 * @return A tuple expression for this graph pattern.
 	 */
 	public TupleExpr buildTupleExpr() {
-		TupleExpr result;
-
-		if (requiredTEs.isEmpty()) {
-			result = new SingletonSet();
-		} else {
-			result = requiredTEs.get(0);
-
-			for (int i = 1; i < requiredTEs.size(); i++) {
-				TupleExpr te = requiredTEs.get(i);
-				result = new Join(result, te);
-			}
-		}
+		TupleExpr result = buildJoinFromRequiredTEs();
 
 		for (Map.Entry<TupleExpr, List<ValueExpr>> entry : optionalTEs) {
 			List<ValueExpr> constraints = entry.getValue();
@@ -194,4 +194,22 @@ public class GraphPattern {
 		return result;
 	}
 
+	/**
+	 * Build a single tuple expression representing _only_ the basic graph pattern, by joining the required TEs
+	 */
+	TupleExpr buildJoinFromRequiredTEs() {
+		TupleExpr result;
+
+		if (requiredTEs.isEmpty()) {
+			result = new SingletonSet();
+		} else {
+			result = requiredTEs.get(0);
+
+			for (int i = 1; i < requiredTEs.size(); i++) {
+				TupleExpr te = requiredTEs.get(i);
+				result = new Join(result, te);
+			}
+		}
+		return result;
+	}
 }

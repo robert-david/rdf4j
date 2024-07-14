@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.hdt;
 
@@ -19,27 +22,27 @@ import org.eclipse.rdf4j.common.io.UncloseableInputStream;
 
 /**
  * HDT DictionarySection Plain Front Coding.
- *
+ * <p>
  * This part starts with a byte indicating the type of the dictionary section, followed by the VByte-encoded number of
  * strings, the VByte-encoded buffer size and the VByte-encoded buffer length.
- *
+ * <p>
  * Then the 8-bit CRC.
- *
+ * <p>
  * Followed by an array and one or more buffers, and the 32-bit CRC calculated over the index and the buffers.
- *
+ * <p>
  * Structure:
  *
  * <pre>
  * +------+--------------+--------------+-------+------+-------+--------+...+-------+
- * | type | totalStrings | stringsBlock | array | CRC8 | index | buffer |...| CRC32 | 
+ * | type | totalStrings | stringsBlock | array | CRC8 | index | buffer |...| CRC32 |
  * +------+--------------+--------------+-------+------+-------+--------+...+-------+
  * </pre>
- *
+ * <p>
  * Each buffer starts with a full string, followed by a maximum of <code>stringsBlock</code> - 1 pair of a VByte-encoded
  * number of characters this string has in common with the _previous_ string, and the (different) suffix.
- *
+ * <p>
  * E.g. <code>abcdef 2 gh 3 ij</code> will result in <code>abcde, abgh, abgij</code>.
- *
+ * <p>
  * Buffer structure:
  *
  * <pre>
@@ -58,8 +61,7 @@ class HDTDictionarySectionPFC extends HDTDictionarySection {
 	private HDTArray blockStarts;
 
 	// keep most recently used blocks in memory as decoded values
-	private final LinkedHashMap<Integer, ArrayList<byte[]>> cache = new LinkedHashMap<Integer, ArrayList<byte[]>>(100,
-			1, true) {
+	private final LinkedHashMap<Integer, ArrayList<byte[]>> cache = new LinkedHashMap<>(100, 1, true) {
 		@Override
 		protected boolean removeEldestEntry(Map.Entry eldest) {
 			return size() > 99;

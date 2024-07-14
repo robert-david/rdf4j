@@ -1,18 +1,22 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.turtle;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,8 +44,8 @@ import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 import org.eclipse.rdf4j.rio.helpers.SimpleParseLocationListener;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.rio.helpers.TurtleParserSettings;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author jeen
@@ -50,7 +54,7 @@ public class TurtleParserTest {
 
 	private TurtleParser parser;
 
-	private ValueFactory vf = SimpleValueFactory.getInstance();
+	private final ValueFactory vf = SimpleValueFactory.getInstance();
 
 	private final ParseErrorCollector errorCollector = new ParseErrorCollector();
 
@@ -60,12 +64,9 @@ public class TurtleParserTest {
 
 	private final String baseURI = "http://example.org/";
 
-	private SimpleParseLocationListener locationListener = new SimpleParseLocationListener();
+	private final SimpleParseLocationListener locationListener = new SimpleParseLocationListener();
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
+	@BeforeEach
 	public void setUp() {
 		parser = new TurtleParser();
 		parser.setParseErrorListener(errorCollector);
@@ -425,7 +426,7 @@ public class TurtleParserTest {
 	public void rdfXmlLoadedFromInsideAJarResolvesRelativeUris() throws IOException {
 		URL zipfileUrl = TurtleParserTest.class.getResource("sample-with-turtle-data.zip");
 
-		assertNotNull("The sample-with-turtle-data.zip file must be present for this test", zipfileUrl);
+		assertNotNull(zipfileUrl, "The sample-with-turtle-data.zip file must be present for this test");
 
 		String url = "jar:" + zipfileUrl + "!/index.ttl";
 
@@ -459,7 +460,7 @@ public class TurtleParserTest {
 		assertEquals("jar", javaUrl.getProtocol());
 
 		try (InputStream uc = javaUrl.openStream()) {
-			assertEquals("The resource stream should be empty", -1, uc.read());
+			assertEquals(-1, uc.read(), "The resource stream should be empty");
 		}
 
 		assertEquals(res, stmt2.getSubject());
@@ -521,7 +522,6 @@ public class TurtleParserTest {
 
 	/**
 	 * Extend standard Turtle parser to also accept RDF-star data (see GH-2511)
-	 *
 	 */
 	@Test
 	public void testParseRDFStarData() throws IOException {
@@ -571,12 +571,12 @@ public class TurtleParserTest {
 		}
 	}
 
-	@Test(expected = RDFParseException.class)
+	@Test
 	public void testParseRDFStar_TurtleStarDisabled() throws IOException {
 		parser.getParserConfig().set(TurtleParserSettings.ACCEPT_TURTLESTAR, false);
 
 		try (InputStream in = this.getClass().getResourceAsStream("/test-rdfstar.ttls")) {
-			parser.parse(in, baseURI);
+			assertThrows(RDFParseException.class, () -> parser.parse(in, baseURI));
 		}
 	}
 

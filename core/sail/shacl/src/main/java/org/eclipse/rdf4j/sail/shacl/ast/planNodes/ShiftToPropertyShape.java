@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.shacl.ast.planNodes;
@@ -28,8 +31,7 @@ public class ShiftToPropertyShape implements PlanNode {
 	private ValidationExecutionLogger validationExecutionLogger;
 
 	public ShiftToPropertyShape(PlanNode parent) {
-		parent = PlanNodeHelper.handleSorting(this, parent);
-		this.parent = parent;
+		this.parent = PlanNodeHelper.handleSorting(this, parent);
 		// this.stackTrace = Thread.currentThread().getStackTrace();
 	}
 
@@ -37,8 +39,13 @@ public class ShiftToPropertyShape implements PlanNode {
 	public CloseableIteration<? extends ValidationTuple, SailException> iterator() {
 		return new LoggingCloseableIteration(this, validationExecutionLogger) {
 
-			final CloseableIteration<? extends ValidationTuple, SailException> parentIterator = parent.iterator();
+			private CloseableIteration<? extends ValidationTuple, SailException> parentIterator;
 			Iterator<ValidationTuple> iterator = Collections.emptyIterator();
+
+			@Override
+			protected void init() {
+				parentIterator = parent.iterator();
+			}
 
 			public void calculateNext() {
 				if (!iterator.hasNext()) {
@@ -51,19 +58,21 @@ public class ShiftToPropertyShape implements PlanNode {
 			}
 
 			@Override
-			public void localClose() throws SailException {
-				parentIterator.close();
+			public void localClose() {
+				if (parentIterator != null) {
+					parentIterator.close();
+				}
 				iterator = Collections.emptyIterator();
 			}
 
 			@Override
-			protected boolean localHasNext() throws SailException {
+			protected boolean localHasNext() {
 				calculateNext();
 				return iterator.hasNext();
 			}
 
 			@Override
-			protected ValidationTuple loggingNext() throws SailException {
+			protected ValidationTuple loggingNext() {
 				calculateNext();
 
 				return iterator.next();

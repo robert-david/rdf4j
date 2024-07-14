@@ -1,27 +1,27 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.elasticsearchstore.compliance;
 
-import java.io.File;
+import java.io.IOException;
 
-import org.assertj.core.util.Files;
 import org.eclipse.rdf4j.sail.NotifyingSail;
 import org.eclipse.rdf4j.sail.NotifyingSailConnection;
 import org.eclipse.rdf4j.sail.Sail;
 import org.eclipse.rdf4j.sail.SailException;
-import org.eclipse.rdf4j.sail.SailIsolationLevelTest;
 import org.eclipse.rdf4j.sail.elasticsearchstore.ElasticsearchStore;
 import org.eclipse.rdf4j.sail.elasticsearchstore.SingletonClientProvider;
 import org.eclipse.rdf4j.sail.elasticsearchstore.TestHelpers;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
+import org.eclipse.rdf4j.testsuite.sail.SailIsolationLevelTest;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 /**
  * An extension of {@link SailIsolationLevelTest} for testing the class
@@ -29,27 +29,20 @@ import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
  */
 public class ElasticsearchStoreIsolationLevelIT extends SailIsolationLevelTest {
 
-	private static EmbeddedElastic embeddedElastic;
-
-	private static File installLocation = Files.newTemporaryFolder();
-
 	private static SingletonClientProvider clientPool;
 
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-
+	@BeforeAll
+	public static void beforeClass() throws IOException, InterruptedException {
 		SailIsolationLevelTest.setUpClass();
-		embeddedElastic = TestHelpers.startElasticsearch(installLocation);
-		clientPool = new SingletonClientProvider("localhost", embeddedElastic.getTransportTcpPort(), "cluster1");
-
+		TestHelpers.openClient();
+		clientPool = new SingletonClientProvider("localhost", TestHelpers.PORT, TestHelpers.CLUSTER);
 	}
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-
+	@AfterAll
+	public static void afterClass2() throws Exception {
+		SailIsolationLevelTest.afterClass();
 		clientPool.close();
-		TestHelpers.stopElasticsearch(embeddedElastic, installLocation);
-
+		TestHelpers.closeClient();
 	}
 
 	@Override

@@ -1,9 +1,12 @@
 /*******************************************************************************
- * .Copyright (c) 2020 Eclipse RDF4J contributors.
+ * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.shacl.ast.planNodes;
@@ -19,10 +22,9 @@ import org.eclipse.rdf4j.sail.SailException;
 
 /**
  * Pops the last target off of the target chain and into the value.
- *
+ * <p>
  * This is useful when a plan node operates on the values, but tuple with only targets is supplied and we want to
  * validate the last target.
- *
  *
  * @author Håvard Ottestad
  */
@@ -34,8 +36,7 @@ public class TargetChainPopper implements PlanNode {
 	private ValidationExecutionLogger validationExecutionLogger;
 
 	public TargetChainPopper(PlanNode parent) {
-		parent = PlanNodeHelper.handleSorting(this, parent);
-		this.parent = parent;
+		this.parent = PlanNodeHelper.handleSorting(this, parent);
 		// this.stackTrace = Thread.currentThread().getStackTrace();
 	}
 
@@ -44,9 +45,13 @@ public class TargetChainPopper implements PlanNode {
 
 		return new LoggingCloseableIteration(this, validationExecutionLogger) {
 
-			final private CloseableIteration<? extends ValidationTuple, SailException> parentIterator = parent
-					.iterator();
+			private CloseableIteration<? extends ValidationTuple, SailException> parentIterator;
 			Iterator<ValidationTuple> iterator = Collections.emptyIterator();
+
+			@Override
+			protected void init() {
+				parentIterator = parent.iterator();
+			}
 
 			public void calculateNext() {
 				if (!iterator.hasNext()) {
@@ -59,19 +64,21 @@ public class TargetChainPopper implements PlanNode {
 			}
 
 			@Override
-			public void localClose() throws SailException {
-				parentIterator.close();
+			public void localClose() {
+				if (parentIterator != null) {
+					parentIterator.close();
+				}
 				iterator = Collections.emptyIterator();
 			}
 
 			@Override
-			protected boolean localHasNext() throws SailException {
+			protected boolean localHasNext() {
 				calculateNext();
 				return iterator.hasNext();
 			}
 
 			@Override
-			protected ValidationTuple loggingNext() throws SailException {
+			protected ValidationTuple loggingNext() {
 				calculateNext();
 
 				return iterator.next();

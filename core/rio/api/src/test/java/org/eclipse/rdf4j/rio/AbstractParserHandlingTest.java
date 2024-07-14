@@ -1,16 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,9 +41,9 @@ import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 import org.eclipse.rdf4j.rio.helpers.RDFStarUtil;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,7 +213,7 @@ public abstract class AbstractParserHandlingTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		testParser = getParser();
 
@@ -225,7 +228,7 @@ public abstract class AbstractParserHandlingTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		testListener.reset();
 		testListener = null;
@@ -966,22 +969,22 @@ public abstract class AbstractParserHandlingTest {
 			logger.trace("Expected: {}", expectedModel);
 			logger.trace("Actual: {}", testStatements);
 		}
-		assertTrue("Did not find expected statements", Models.isomorphic(expectedModel, testStatements));
+		assertTrue(Models.isomorphic(expectedModel, testStatements), "Did not find expected statements");
 	}
 
 	private void assertErrorListener(int expectedWarnings, int expectedErrors, int expectedFatalErrors) {
-		assertEquals("Unexpected number of fatal errors", expectedFatalErrors, testListener.getFatalErrors().size());
-		assertEquals("Unexpected number of errors", expectedErrors, testListener.getErrors().size());
-		assertEquals("Unexpected number of warnings", expectedWarnings, testListener.getWarnings().size());
+		assertEquals(expectedFatalErrors, testListener.getFatalErrors().size(), "Unexpected number of fatal errors");
+		assertEquals(expectedErrors, testListener.getErrors().size(), "Unexpected number of errors");
+		assertEquals(expectedWarnings, testListener.getWarnings().size(), "Unexpected number of warnings");
 	}
 
-	private final Model getTestModel(String datatypeValue, IRI datatypeURI) {
+	private Model getTestModel(String datatypeValue, IRI datatypeURI) {
 		Model result = new LinkedHashModel();
 		result.add(vf.createStatement(vf.createBNode(), DC.DESCRIPTION, vf.createLiteral(datatypeValue, datatypeURI)));
 		return result;
 	}
 
-	private final Model getTestModel(String languageValue, String languageTag) {
+	private Model getTestModel(String languageValue, String languageTag) {
 		Model result = new LinkedHashModel();
 		result.add(vf.createStatement(vf.createBNode(), RDFS.COMMENT, vf.createLiteral(languageValue, languageTag)));
 		return result;

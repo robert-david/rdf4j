@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2018 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.nativerdf.btree;
 
@@ -50,7 +53,7 @@ interface NodeListener {
 	 *
 	 * @param sourceNode The node that donated its values to the target node.
 	 * @param targetNode The node in which the values have been merged.
-	 * @param mergeIdx   The index of <tt>sourceNode</tt>'s values in <tt>targetNode</tt> .
+	 * @param mergeIdx   The index of <var>sourceNode</var>'s values in <var>targetNode</var> .
 	 * @return Indicates whether the node listener should be deregistered with the <em>source node</em> as a result of
 	 *         this event.
 	 */

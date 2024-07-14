@@ -1,9 +1,12 @@
-/******************************************************************************* 
- * Copyright (c) 2021 Eclipse RDF4J contributors. 
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Distribution License v1.0 
- * which accompanies this distribution, and is available at 
- * http://www.eclipse.org/org/documents/edl-v10.php. 
+/*******************************************************************************
+ * Copyright (c) 2021 Eclipse RDF4J contributors.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Distribution License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.query.algebra.evaluation.impl;
 
@@ -20,6 +23,7 @@ import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
 import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
+import org.eclipse.rdf4j.query.algebra.evaluation.optimizer.StandardQueryOptimizerPipeline;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
@@ -55,7 +59,7 @@ public class ParentReferenceCleanerTest {
 
 		private final ArrayDeque<QueryModelNode> ancestors = new ArrayDeque<>();
 
-		private List<QueryModelNode> inconsistentNodes = new ArrayList<>();
+		private final List<QueryModelNode> inconsistentNodes = new ArrayList<>();
 
 		@Override
 		protected void meetNode(QueryModelNode node) throws RuntimeException {

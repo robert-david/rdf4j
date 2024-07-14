@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.queryrender.sparql.experimental;
 
@@ -66,7 +69,6 @@ import org.eclipse.rdf4j.query.algebra.Label;
 import org.eclipse.rdf4j.query.algebra.Lang;
 import org.eclipse.rdf4j.query.algebra.LangMatches;
 import org.eclipse.rdf4j.query.algebra.LeftJoin;
-import org.eclipse.rdf4j.query.algebra.Like;
 import org.eclipse.rdf4j.query.algebra.ListMemberOperator;
 import org.eclipse.rdf4j.query.algebra.Load;
 import org.eclipse.rdf4j.query.algebra.LocalName;
@@ -116,18 +118,16 @@ import com.google.common.collect.Sets;
 
 /**
  * This class processes a {@link SerializableParsedTupleQuery} and renders it as a SPARQL string.
- * 
+ *
  * @author Andriy Nikolov
  * @author Jeen Broekstra
  * @author Andreas Schwarte
- *
  */
 class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeException> {
 
 	/**
 	 * Enumeration of standard SPARQL 1.1 functions that are neither recognized by RDF4J as special value expressions
 	 * nor defined as IRI functions in the <i>fn:</i> namespace (see {@link FNFunction}).
-	 * 
 	 */
 	protected enum NonIriFunctions {
 		STRLANG,
@@ -153,7 +153,7 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 		}
 	}
 
-	private Map<Projection, SerializableParsedTupleQuery> queriesByProjection = new HashMap<Projection, SerializableParsedTupleQuery>();
+	private final Map<Projection, SerializableParsedTupleQuery> queriesByProjection = new HashMap<>();
 
 	private AbstractSerializableParsedQuery currentQueryProfile = null;
 
@@ -161,7 +161,7 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 
 	protected StringBuilder builder;
 
-	private Map<AbstractSerializableParsedQuery, Set<String>> renderedExtensionElements = Maps.newHashMap();
+	private final Map<AbstractSerializableParsedQuery, Set<String>> renderedExtensionElements = Maps.newHashMap();
 
 	private boolean insideFunction = false;
 
@@ -171,7 +171,7 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 
 	/**
 	 * Serializes a {@link SerializableParsedTupleQuery} passed as an input.
-	 * 
+	 *
 	 * @param query a parsed tuple query previously produced by {@link ParsedQueryPreprocessor}
 	 * @return string SPARQL serialization of the query
 	 */
@@ -188,7 +188,7 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 
 	/**
 	 * Serializes a {@link SerializableParsedBooleanQuery} passed as an input.
-	 * 
+	 *
 	 * @param query a parsed tuple query previously produced by {@link ParsedQueryPreprocessor}
 	 * @return string SPARQL serialization of the query
 	 */
@@ -291,8 +291,10 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 		renderedExtensionElements.put(query, Sets.newHashSet());
 		this.currentQueryProfile = query;
 		builder.append("CONSTRUCT { \n");
+
 		this.meet(query.projection);
 		builder.append("} ");
+
 		processDatasetClause(query.dataset);
 
 		builder.append("WHERE { \n");
@@ -381,7 +383,7 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 
 	/**
 	 * Serializes the TupleExpr serving as a WHERE clause of the query.
-	 * 
+	 *
 	 * @param whereClause a TupleExpr representing a WHERE clause
 	 */
 	public void meetWhereClause(TupleExpr whereClause) {
@@ -446,7 +448,7 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 	@Override
 	public void meet(BindingSetAssignment node) throws RuntimeException {
 
-		List<String> bindingNames = new ArrayList<String>(node.getBindingNames());
+		List<String> bindingNames = new ArrayList<>(node.getBindingNames());
 
 		builder.append("VALUES (");
 		for (String var : bindingNames) {
@@ -828,12 +830,6 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 	}
 
 	@Override
-	public void meet(Like node) throws RuntimeException {
-		super.meet(node);
-
-	}
-
-	@Override
 	public void meet(ListMemberOperator node) throws RuntimeException {
 		Iterator<ValueExpr> argIter = node.getArguments().iterator();
 		ValueExpr operand = argIter.next();
@@ -956,15 +952,15 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 
 		for (ProjectionElemList proj : node.getProjections()) {
 			for (ProjectionElem elem : proj.getElements()) {
-				if (valueMap.containsKey(elem.getSourceName())) {
-					ValueExpr expr = valueMap.get(elem.getSourceName());
+				if (valueMap.containsKey(elem.getName())) {
+					ValueExpr expr = valueMap.get(elem.getName());
 					if (expr instanceof BNodeGenerator) {
-						builder.append("_:" + elem.getSourceName());
+						builder.append("_:" + elem.getName());
 					} else {
-						valueMap.get(elem.getSourceName()).visit(this);
+						valueMap.get(elem.getName()).visit(this);
 					}
 				} else {
-					builder.append("?" + elem.getSourceName());
+					builder.append("?" + elem.getName());
 				}
 				builder.append(" ");
 				// elem.getSourceExpression().getExpr().visit(this);
@@ -1036,31 +1032,30 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 
 	@Override
 	public void meet(ProjectionElem node) throws RuntimeException {
-
 		if (node.getSourceExpression() == null) {
 			boolean isDescribe = false;
 			if ((this.currentQueryProfile instanceof SerializableParsedConstructQuery)) {
 				isDescribe = ((SerializableParsedConstructQuery) this.currentQueryProfile).describe;
 			}
 
-			if (node.getSourceName() == null || node.getTargetName().equals(node.getSourceName())) {
-				if (isDescribe && this.currentQueryProfile.extensionElements.containsKey(node.getTargetName())) {
-					ExtensionElem elem = this.currentQueryProfile.extensionElements.get(node.getTargetName());
+			if (node.getProjectionAlias().isEmpty() || node.getProjectionAlias().get().equals(node.getName())) {
+				if (isDescribe && this.currentQueryProfile.extensionElements.containsKey(node.getName())) {
+					ExtensionElem elem = this.currentQueryProfile.extensionElements.get(node.getName());
 					elem.getExpr().visit(this);
 					builder.append(" ");
 				} else {
 					builder.append("?");
-					builder.append(node.getTargetName());
+					builder.append(node.getName());
 					builder.append(" ");
 				}
 			} else {
 				builder.append("(");
 				builder.append("?");
-				builder.append(node.getSourceName());
+				builder.append(node.getName());
 				builder.append(" ");
 				builder.append("AS ");
 				builder.append("?");
-				builder.append(node.getTargetName());
+				builder.append(node.getProjectionAlias());
 				builder.append(" ");
 				builder.append(") ");
 			}
@@ -1071,7 +1066,7 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 				builder.append(") ");
 			} else {
 				builder.append("?");
-				builder.append(node.getTargetName());
+				builder.append(node.getName());
 				builder.append(" ");
 			}
 		}
@@ -1222,7 +1217,6 @@ class PreprocessedQuerySerializer extends AbstractQueryModelVisitor<RuntimeExcep
 	/**
 	 * A special case check: we project a variable from a subquery that has the same name We must avoid writing SELECT
 	 * (?x as ?x) WHERE { { SELECT ?x WHERE { ... } } }
-	 * 
 	 */
 	private boolean isTautologicalExtensionElem(ExtensionElem val) {
 		String varName = val.getName();

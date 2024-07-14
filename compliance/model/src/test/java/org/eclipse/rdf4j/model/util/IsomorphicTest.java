@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.model.util;
@@ -21,8 +24,9 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 public class IsomorphicTest {
 
@@ -55,7 +59,7 @@ public class IsomorphicTest {
 	static private Model manyProperties_2;
 	static private Model manyProperties2_2;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		empty = getModel("empty.ttl");
 		blankNodes = getModel("blankNodes.ttl");
@@ -185,7 +189,8 @@ public class IsomorphicTest {
 		assertThat(Models.isomorphic(m1, m2));
 	}
 
-	@Test(timeout = 2000)
+	@Test
+	@Timeout(2)
 	public void testValidationReport_LexicalOrdering() throws IOException {
 		Model m1 = getModel("shaclValidationReport.ttl");
 		Model m2 = getModel("shaclValidationReport.ttl");

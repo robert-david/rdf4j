@@ -1,10 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
- ******************************************************************************/
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *******************************************************************************/
 package org.eclipse.rdf4j.sail.shacl.ast;
 
 import java.util.ArrayList;
@@ -21,7 +24,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.sail.shacl.wrapper.shape.ShapeSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +32,8 @@ public class ShaclProperties {
 
 	private static final Logger logger = LoggerFactory.getLogger(ShaclProperties.class);
 
-	// every shape is either a sh:NodeShape or a sh:PropertyShape, we default to NodeShape since sh:path has domain
-	// sh:PropertyShape so the reasoner will figure that out
-	private IRI type = SHACL.NODE_SHAPE;
+	private Resource id;
+	private IRI type;
 
 	private final List<IRI> clazz = new ArrayList<>();
 	private final List<Resource> or = new ArrayList<>();
@@ -90,25 +92,37 @@ public class ShaclProperties {
 	boolean closed = false;
 	private Resource ignoredProperties;
 
-	private Resource id;
-
 	private final List<Literal> message = new ArrayList<>();
+	private IRI severity;
+
+	private final List<Resource> sparql = new ArrayList<>();
 
 	public ShaclProperties() {
 	}
 
-	public ShaclProperties(Resource id, RepositoryConnection connection) {
+	public ShaclProperties(Resource id, ShapeSource connection) {
 		this.id = id;
-		try (Stream<Statement> stream = connection.getStatements(id, null, null, true).stream()) {
+		try (Stream<Statement> stream = connection.getAllStatements(id)) {
 			stream.forEach(statement -> {
+
 				String predicate = statement.getPredicate().toString();
 				Value object = statement.getObject();
+
 				switch (predicate) {
 				case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-					if (object.stringValue().equals("http://www.w3.org/ns/shacl#NodeShape")) {
-						this.type = SHACL.NODE_SHAPE;
-					} else if (object.stringValue().equals("http://www.w3.org/ns/shacl#PropertyShape")) {
-						this.type = SHACL.PROPERTY_SHAPE;
+					if (object.equals(SHACL.NODE_SHAPE)) {
+						if (type != null && !type.equals(SHACL.NODE_SHAPE)) {
+							throw new IllegalStateException(
+									"Shape " + id + " with multiple types: <" + type + ">, <" + SHACL.NODE_SHAPE + ">");
+						}
+						type = SHACL.NODE_SHAPE;
+					} else if (object.equals(SHACL.PROPERTY_SHAPE)) {
+						if (type != null && !type.equals(SHACL.PROPERTY_SHAPE)) {
+							throw new IllegalStateException(
+									"Shape " + id + " with multiple types: <" + type + ">, <" + SHACL.PROPERTY_SHAPE
+											+ ">");
+						}
+						type = SHACL.PROPERTY_SHAPE;
 					}
 					break;
 				case "http://www.w3.org/ns/shacl#or":
@@ -131,6 +145,12 @@ public class ShaclProperties {
 					break;
 				case "http://www.w3.org/ns/shacl#message":
 					message.add((Literal) object);
+					break;
+				case "http://www.w3.org/ns/shacl#severity":
+					if (severity != null) {
+						throw new IllegalStateException(predicate + " already populated");
+					}
+					severity = (IRI) object;
 					break;
 				case "http://www.w3.org/ns/shacl#languageIn":
 					if (languageIn != null) {
@@ -241,6 +261,12 @@ public class ShaclProperties {
 					if (path != null) {
 						throw new IllegalStateException(predicate + " already populated");
 					}
+					if (type == null) {
+						type = SHACL.PROPERTY_SHAPE;
+					} else if (!type.equals(SHACL.PROPERTY_SHAPE)) {
+						throw new IllegalStateException("Shape " + id
+								+ " has sh:path and must be of type sh:PropertyShape but is type " + type);
+					}
 					path = (Resource) object;
 					break;
 				case "http://www.w3.org/ns/shacl#in":
@@ -297,6 +323,12 @@ public class ShaclProperties {
 				case "http://rdf4j.org/shacl-extensions#targetShape":
 					targetShape.add((Resource) object);
 					break;
+				case "http://www.w3.org/ns/shacl#sparql":
+					if (!object.isResource()) {
+						throw new IllegalStateException("Object is not a resource: " + statement);
+					}
+					sparql.add((Resource) object);
+					break;
 
 				default:
 					if (predicate.startsWith(SHACL.NAMESPACE)) {
@@ -307,6 +339,11 @@ public class ShaclProperties {
 				}
 
 			});
+		}
+
+		// We default to sh:NodeShape if no other type is given.
+		if (type == null) {
+			type = path == null ? SHACL.NODE_SHAPE : SHACL.PROPERTY_SHAPE;
 		}
 
 	}
@@ -423,6 +460,10 @@ public class ShaclProperties {
 		return message;
 	}
 
+	public IRI getSeverity() {
+		return severity;
+	}
+
 	public List<Resource> getProperty() {
 		return property;
 	}
@@ -489,5 +530,9 @@ public class ShaclProperties {
 
 	public Boolean getQualifiedValueShapesDisjoint() {
 		return qualifiedValueShapesDisjoint;
+	}
+
+	public List<Resource> getSparql() {
+		return sparql;
 	}
 }

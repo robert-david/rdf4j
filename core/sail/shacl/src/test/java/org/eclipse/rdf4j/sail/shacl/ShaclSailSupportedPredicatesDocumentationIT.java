@@ -1,60 +1,56 @@
 /*******************************************************************************
  * Copyright (c) 2018 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.shacl;
-
-import static junit.framework.TestCase.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
-import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.DASH;
 import org.eclipse.rdf4j.model.vocabulary.RSX;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * @author Håvard Ottestad
  */
-@RunWith(Parameterized.class)
 public class ShaclSailSupportedPredicatesDocumentationIT extends AbstractShaclTest {
 
-	private static HashSet<IRI> staticShaclPredicates = new HashSet<>(ShaclSail.getSupportedShaclPredicates());
+	private static final Set<IRI> STATIC_SHACL_PREDICATES = new CopyOnWriteArraySet<>(
+			ShaclSail.getSupportedShaclPredicates());
 
-	public ShaclSailSupportedPredicatesDocumentationIT(String testCasePath, String path,
-			ExpectedResult expectedResult, IsolationLevel isolationLevel) {
-		super(testCasePath, path, expectedResult, isolationLevel);
-	}
-
-	@AfterClass
+	@AfterAll
 	public static void afterClass() {
 
-		assertTrue("No test uses the following predicate that the ShaclSail announces as supported: "
-				+ Arrays.toString(staticShaclPredicates.toArray()), staticShaclPredicates.isEmpty());
+		Assertions.assertTrue(STATIC_SHACL_PREDICATES.isEmpty(),
+				"No test uses the following predicate that the ShaclSail announces as supported: "
+						+ Arrays.toString(STATIC_SHACL_PREDICATES.toArray()));
 	}
 
-	@Test
-	public void testShaclSailSupportedPredicatesDocumentation() throws IOException {
+	@ParameterizedTest
+	@MethodSource("testCases")
+	public void testShaclSailSupportedPredicatesDocumentation(TestCase testCase) throws IOException {
 
 		HashSet<IRI> shaclPredicates = new HashSet<>(ShaclSail.getSupportedShaclPredicates());
 
-		Model parse = getShacl();
+		Model parse = testCase.getShacl();
 
 		Set<IRI> predicatesInUseInTest = parse.predicates()
 				.stream()
@@ -64,19 +60,11 @@ public class ShaclSailSupportedPredicatesDocumentationIT extends AbstractShaclTe
 				.collect(Collectors.toSet());
 
 		for (IRI predicate : predicatesInUseInTest) {
-			assertTrue("Predicate used in test but not listed in ShaclSail: " + predicate,
-					shaclPredicates.contains(predicate));
-			staticShaclPredicates.remove(predicate);
+			Assertions.assertTrue(shaclPredicates.contains(predicate),
+					"Predicate used in test but not listed in ShaclSail: " + predicate);
+			STATIC_SHACL_PREDICATES.remove(predicate);
 		}
 
-	}
-
-	private Model getShacl() throws IOException {
-		String shaclFile = getShaclPath();
-
-		return Rio.parse(
-				ShaclSailSupportedPredicatesDocumentationIT.class.getClassLoader().getResourceAsStream(shaclFile), "",
-				RDFFormat.TURTLE);
 	}
 
 }

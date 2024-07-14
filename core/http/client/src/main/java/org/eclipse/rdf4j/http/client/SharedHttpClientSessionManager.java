@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.http.client;
 
@@ -52,10 +55,14 @@ public class SharedHttpClientSessionManager implements HttpClientSessionManager,
 
 	private final Logger logger = LoggerFactory.getLogger(SharedHttpClientSessionManager.class);
 
-	/** independent life cycle */
+	/**
+	 * independent life cycle
+	 */
 	private volatile HttpClient httpClient;
 
-	/** dependent life cycle */
+	/**
+	 * dependent life cycle
+	 */
 	private volatile CloseableHttpClient dependentClient;
 
 	private final ExecutorService executor;
@@ -74,7 +81,7 @@ public class SharedHttpClientSessionManager implements HttpClientSessionManager,
 	 * Retry handler: closes stale connections and suggests to simply retry the HTTP request once. Just closing the
 	 * stale connection is enough: the connection will be reopened elsewhere. This seems to be necessary for Jetty
 	 * 9.4.24+.
-	 * 
+	 * <p>
 	 * Other HTTP issues are considered to be more severe, so these requests are not retried.
 	 */
 	private static class RetryHandlerStale implements HttpRequestRetryHandler {
@@ -88,15 +95,16 @@ public class SharedHttpClientSessionManager implements HttpClientSessionManager,
 			}
 			HttpClientContext clientContext = HttpClientContext.adapt(context);
 			HttpConnection conn = clientContext.getConnection();
-
-			synchronized (this) {
-				if (conn.isStale()) {
-					try {
-						logger.warn("Closing stale connection");
-						conn.close();
-						return true;
-					} catch (IOException e) {
-						logger.error("Error closing stale connection", e);
+			if (conn != null) {
+				synchronized (this) {
+					if (conn.isStale()) {
+						try {
+							logger.warn("Closing stale connection");
+							conn.close();
+							return true;
+						} catch (IOException e) {
+							logger.error("Error closing stale connection", e);
+						}
 					}
 				}
 			}

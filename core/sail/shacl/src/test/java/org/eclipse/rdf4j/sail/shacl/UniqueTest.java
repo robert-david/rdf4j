@@ -1,14 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.shacl;
-
-import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,15 +21,16 @@ import org.eclipse.rdf4j.sail.shacl.ast.planNodes.Unique;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.ValidationTuple;
 import org.eclipse.rdf4j.sail.shacl.mock.MockConsumePlanNode;
 import org.eclipse.rdf4j.sail.shacl.mock.MockInputPlanNode;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class UniqueTest {
 
 	@Test
 	public void tupleCardinality1() {
 
-		MockInputPlanNode input = new MockInputPlanNode(Arrays.asList("a"), Arrays.asList("b"), Arrays.asList("b"),
-				Arrays.asList("c"));
+		MockInputPlanNode input = new MockInputPlanNode(List.of("a"), List.of("b"), List.of("b"),
+				List.of("c"));
 
 		runTest(input, false);
 
@@ -37,7 +39,7 @@ public class UniqueTest {
 	@Test
 	public void tupleCardinality2() {
 
-		MockInputPlanNode input = new MockInputPlanNode(Arrays.asList("a"), Arrays.asList("b", "2"), Arrays.asList("b"),
+		MockInputPlanNode input = new MockInputPlanNode(List.of("a"), Arrays.asList("b", "2"), List.of("b"),
 				Arrays.asList("b", "3"), Arrays.asList("b", "2"), Arrays.asList("c", "1"));
 
 		runTest(input, false);
@@ -84,7 +86,7 @@ public class UniqueTest {
 
 		List<ValidationTuple> tuples = new MockConsumePlanNode(unique).asList();
 
-		assertEquals(2, tuples.size());
+		Assertions.assertEquals(2, tuples.size());
 
 	}
 
@@ -101,7 +103,7 @@ public class UniqueTest {
 		tuples.sort(ValidationTuple::compareFullTarget);
 		expected.sort(ValidationTuple::compareFullTarget);
 
-		assertEquals(expected, tuples);
+		Assertions.assertEquals(expected, tuples);
 	}
 
 }

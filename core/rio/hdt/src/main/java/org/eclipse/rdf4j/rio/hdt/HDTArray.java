@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.hdt;
 
@@ -15,17 +18,17 @@ import org.eclipse.rdf4j.common.io.UncloseableInputStream;
 
 /**
  * HDT Array
- *
+ * <p>
  * This part starts with a byte indicating the type of the array, followed by a byte containing the number of bits used
  * to encode an entry in the array, and the VByte-encoded number of entries.
- *
+ * <p>
  * Then the 8-bit CRC, followed by the array data itself.
- *
+ * <p>
  * Structure:
  *
  * <pre>
  * +------+--------+---------+------+------...
- * | type | nrbits | entries | CRC8 | data 
+ * | type | nrbits | entries | CRC8 | data
  * +------+--------+---------+------+------...
  * </pre>
  *
@@ -48,7 +51,7 @@ abstract class HDTArray extends HDTPart {
 			return value;
 		}
 
-		private Type(int value) {
+		Type(int value) {
 			this.value = value;
 		}
 	}

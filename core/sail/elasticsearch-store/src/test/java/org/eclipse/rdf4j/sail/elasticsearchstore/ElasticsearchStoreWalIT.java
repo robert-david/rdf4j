@@ -1,108 +1,38 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.elasticsearchstore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import org.assertj.core.util.Files;
-import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
-
 // Tests transaction failures that the Write-Ahead-Log should be able to recover from
-public class ElasticsearchStoreWalIT {
+public class ElasticsearchStoreWalIT extends AbstractElasticsearchStoreIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(ElasticsearchStoreWalIT.class);
-	private static final SimpleValueFactory vf = SimpleValueFactory.getInstance();
 
-	private static EmbeddedElastic embeddedElastic;
+	/*
+	 * @After public void after() throws IOException { client.indices().refresh(Requests.refreshRequest("*"),
+	 * RequestOptions.DEFAULT); deleteAllIndexes(); }
+	 */
 
-	private static File installLocation = Files.newTemporaryFolder();
-
-	@BeforeClass
-	public static void beforeClass() throws IOException, InterruptedException {
-
-		embeddedElastic = TestHelpers.startElasticsearch(installLocation);
-	}
-
-	@AfterClass
-	public static void afterClass() throws IOException {
-
-		TestHelpers.stopElasticsearch(embeddedElastic, installLocation);
-	}
-
-	@After
-	public void after() throws UnknownHostException {
-
-		embeddedElastic.refreshIndices();
-
-		deleteAllIndexes();
-
-	}
-
-	@Before
-	public void before() throws UnknownHostException {
-//		embeddedElastic.refreshIndices();
-//
-//		embeddedElastic.deleteIndices();
-
-	}
-
-	private void deleteAllIndexes() {
-		for (String index : getIndexes()) {
-			System.out.println("deleting: " + index);
-			embeddedElastic.deleteIndex(index);
-
-		}
-	}
-
-	private String[] getIndexes() {
-
-		Settings settings = Settings.builder().put("cluster.name", "cluster1").build();
-		try (TransportClient client = new PreBuiltTransportClient(settings)) {
-			client.addTransportAddress(
-					new TransportAddress(InetAddress.getByName("localhost"), embeddedElastic.getTransportTcpPort()));
-
-			return client.admin()
-					.indices()
-					.getIndex(new GetIndexRequest())
-					.actionGet()
-					.getIndices();
-		} catch (UnknownHostException e) {
-			throw new IllegalStateException(e);
-		}
-
-	}
-
-	@Ignore // No WAL implemented yet
+	@Disabled // No WAL implemented yet
 	@Test
 	public void testAddLargeDataset() {
 
@@ -118,7 +48,7 @@ public class ElasticsearchStoreWalIT {
 		assertTrue(transactionFaild);
 
 		SailRepository elasticsearchStore = new SailRepository(
-				new ElasticsearchStore("localhost", embeddedElastic.getTransportTcpPort(), "cluster1", "testindex"));
+				new ElasticsearchStore("localhost", TestHelpers.PORT, TestHelpers.CLUSTER, "testindex"));
 
 		try (SailRepositoryConnection connection = elasticsearchStore.getConnection()) {
 
@@ -132,7 +62,7 @@ public class ElasticsearchStoreWalIT {
 
 	private void failedTransactionAdd(int count) {
 		ClientProviderWithDebugStats clientProvider = new ClientProviderWithDebugStats("localhost",
-				embeddedElastic.getTransportTcpPort(), "cluster1");
+				TestHelpers.PORT, TestHelpers.CLUSTER);
 
 		ElasticsearchStore es = new ElasticsearchStore(clientProvider, "testindex");
 		SailRepository elasticsearchStore = new SailRepository(es);
@@ -164,7 +94,7 @@ public class ElasticsearchStoreWalIT {
 
 	}
 
-	@Ignore // No WAL implemented yet
+	@Disabled // No WAL implemented yet
 	@Test
 	public void testRemoveLargeDataset() {
 
@@ -183,7 +113,7 @@ public class ElasticsearchStoreWalIT {
 		assertTrue(transactionFaild);
 
 		SailRepository elasticsearchStore = new SailRepository(
-				new ElasticsearchStore("localhost", embeddedElastic.getTransportTcpPort(), "cluster1", "testindex"));
+				new ElasticsearchStore("localhost", TestHelpers.PORT, TestHelpers.CLUSTER, "testindex"));
 
 		try (SailRepositoryConnection connection = elasticsearchStore.getConnection()) {
 
@@ -197,7 +127,7 @@ public class ElasticsearchStoreWalIT {
 
 	private void fill(int count) {
 		SailRepository elasticsearchStore = new SailRepository(
-				new ElasticsearchStore("localhost", embeddedElastic.getTransportTcpPort(), "cluster1", "testindex"));
+				new ElasticsearchStore("localhost", TestHelpers.PORT, TestHelpers.CLUSTER, "testindex"));
 
 		try (SailRepositoryConnection connection = elasticsearchStore.getConnection()) {
 
@@ -213,7 +143,7 @@ public class ElasticsearchStoreWalIT {
 
 	private void failedTransactionRemove() {
 		ClientProviderWithDebugStats clientProvider = new ClientProviderWithDebugStats("localhost",
-				embeddedElastic.getTransportTcpPort(), "cluster1");
+				TestHelpers.PORT, TestHelpers.CLUSTER);
 
 		ElasticsearchStore es = new ElasticsearchStore(clientProvider, "testindex");
 		SailRepository elasticsearchStore = new SailRepository(es);

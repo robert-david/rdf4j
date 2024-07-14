@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.http.server.repository.transaction;
 
@@ -28,6 +31,8 @@ import static org.eclipse.rdf4j.http.protocol.Protocol.USING_GRAPH_PARAM_NAME;
 import static org.eclipse.rdf4j.http.protocol.Protocol.USING_NAMED_GRAPH_PARAM_NAME;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -96,7 +101,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
  */
 public class TransactionController extends AbstractController implements DisposableBean {
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public TransactionController() throws ApplicationContextException {
 		setSupportedMethods(new String[] { METHOD_POST, "PUT", "DELETE" });
@@ -239,7 +244,7 @@ public class TransactionController extends AbstractController implements Disposa
 				false);
 
 		try {
-			RDFFormat format = null;
+			RDFFormat format;
 			switch (action) {
 			case ADD:
 				format = Rio.getParserFormatForMIMEType(request.getContentType())
@@ -292,7 +297,7 @@ public class TransactionController extends AbstractController implements Disposa
 			ValueFactory vf = repository.getValueFactory();
 			Resource[] contexts = ProtocolUtil.parseContextParam(request, Protocol.CONTEXT_PARAM_NAME, vf);
 
-			long size = -1;
+			long size;
 
 			try {
 				size = transaction.getSize(contexts);
@@ -345,11 +350,11 @@ public class TransactionController extends AbstractController implements Disposa
 	 */
 	private ModelAndView processQuery(Transaction txn, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, HTTPException {
-		String queryStr = null;
+		String queryStr;
 		final String contentType = request.getContentType();
 		if (contentType != null && contentType.contains(Protocol.SPARQL_QUERY_MIME_TYPE)) {
-			final String encoding = request.getCharacterEncoding() != null ? request.getCharacterEncoding() : "UTF-8";
-			queryStr = IOUtils.toString(request.getInputStream(), encoding);
+			Charset charset = getCharset(request);
+			queryStr = IOUtils.toString(request.getInputStream(), charset);
 		} else {
 			queryStr = request.getParameter(QUERY_PARAM_NAME);
 		}
@@ -383,8 +388,13 @@ public class TransactionController extends AbstractController implements Disposa
 				throw new ClientHTTPException(SC_BAD_REQUEST, "Unsupported query type: " + query.getClass().getName());
 			}
 		} catch (QueryInterruptedException | InterruptedException | ExecutionException e) {
-			logger.info("Query interrupted", e);
-			throw new ServerHTTPException(SC_SERVICE_UNAVAILABLE, "Query execution interrupted");
+			if (e.getCause() != null && e.getCause() instanceof MalformedQueryException) {
+				ErrorInfo errInfo = new ErrorInfo(ErrorType.MALFORMED_QUERY, e.getCause().getMessage());
+				throw new ClientHTTPException(SC_BAD_REQUEST, errInfo.toString());
+			} else {
+				logger.info("Query interrupted", e);
+				throw new ServerHTTPException(SC_SERVICE_UNAVAILABLE, "Query execution interrupted");
+			}
 		} catch (QueryEvaluationException e) {
 			logger.info("Query evaluation error", e);
 			if (e.getCause() != null && e.getCause() instanceof HTTPException) {
@@ -404,6 +414,11 @@ public class TransactionController extends AbstractController implements Disposa
 		model.put(QueryResultView.HEADERS_ONLY, false); // TODO needed for HEAD
 		// requests.
 		return new ModelAndView(view, model);
+	}
+
+	private static Charset getCharset(HttpServletRequest request) {
+		return request.getCharacterEncoding() != null ? Charset.forName(request.getCharacterEncoding())
+				: StandardCharsets.UTF_8;
 	}
 
 	private Query getQuery(Transaction txn, String queryStr, HttpServletRequest request, HttpServletResponse response)
@@ -519,13 +534,12 @@ public class TransactionController extends AbstractController implements Disposa
 
 	private ModelAndView getSparqlUpdateResult(Transaction transaction, HttpServletRequest request,
 			HttpServletResponse response) throws ServerHTTPException, ClientHTTPException, HTTPException {
-		String sparqlUpdateString = null;
+		String sparqlUpdateString;
 		final String contentType = request.getContentType();
 		if (contentType != null && contentType.contains(Protocol.SPARQL_UPDATE_MIME_TYPE)) {
 			try {
-				final String encoding = request.getCharacterEncoding() != null ? request.getCharacterEncoding()
-						: "UTF-8";
-				sparqlUpdateString = IOUtils.toString(request.getInputStream(), encoding);
+				Charset charset = getCharset(request);
+				sparqlUpdateString = IOUtils.toString(request.getInputStream(), charset);
 			} catch (IOException e) {
 				logger.warn("error reading sparql update string from request body", e);
 				throw new ClientHTTPException(SC_BAD_REQUEST,

@@ -1,13 +1,17 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.elasticsearchstore.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -16,8 +20,8 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.sail.config.SailConfigException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ElasticsearchStoreConfigTest {
 
@@ -27,7 +31,7 @@ public class ElasticsearchStoreConfigTest {
 
 	private ModelBuilder mb;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		subject = new ElasticsearchStoreConfig();
 		implNode = SimpleValueFactory.getInstance().createBNode();
@@ -49,10 +53,10 @@ public class ElasticsearchStoreConfigTest {
 		// FIXME we need to set formatting guidelines for this kind of thing
 		// @formatter:off
 		mb
-			.add(ElasticsearchStoreSchema.hostname, "host1")
-			.add(ElasticsearchStoreSchema.clusterName, "cluster1")
-			.add(ElasticsearchStoreSchema.index, "index1")
-			.add(ElasticsearchStoreSchema.port, 9300);
+				.add(ElasticsearchStoreSchema.hostname, "host1")
+				.add(ElasticsearchStoreSchema.clusterName, "cluster1")
+				.add(ElasticsearchStoreSchema.index, "index1")
+				.add(ElasticsearchStoreSchema.port, 9300);
 		// @formatter:on
 
 		subject.parse(mb.build(), implNode);
@@ -76,13 +80,13 @@ public class ElasticsearchStoreConfigTest {
 		assertThat(subject.getPort()).isEqualTo(9300);
 	}
 
-	@Test(expected = SailConfigException.class)
+	@Test
 	public void parseInvalidModelGivesCorrectException() {
 
 		mb
 				.add(ElasticsearchStoreSchema.port, "port1");
 
-		subject.parse(mb.build(), implNode);
+		assertThrows(SailConfigException.class, () -> subject.parse(mb.build(), implNode));
 
 	}
 

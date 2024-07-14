@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.queryrender.sparql;
 
@@ -12,6 +15,8 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.algebra.OrderElem;
 import org.eclipse.rdf4j.query.algebra.ProjectionElem;
 import org.eclipse.rdf4j.query.algebra.ProjectionElemList;
+import org.eclipse.rdf4j.query.algebra.QueryRoot;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
 import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
@@ -30,10 +35,10 @@ public class SPARQLQueryRenderer implements QueryRenderer {
 	/**
 	 * The query renderer
 	 */
-	private SparqlTupleExprRenderer mRenderer = new SparqlTupleExprRenderer();
+	private final SparqlTupleExprRenderer mRenderer = new SparqlTupleExprRenderer();
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	@Override
 	public QueryLanguage getLanguage() {
@@ -41,15 +46,19 @@ public class SPARQLQueryRenderer implements QueryRenderer {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	@Override
 	public String render(final ParsedQuery theQuery) throws Exception {
 		mRenderer.reset();
 
-		StringBuffer aBody = new StringBuffer(mRenderer.render(theQuery.getTupleExpr()));
+		TupleExpr tupleExpr = theQuery.getTupleExpr();
+		if (tupleExpr instanceof QueryRoot) {
+			tupleExpr = ((QueryRoot) tupleExpr).getArg();
+		}
+		StringBuffer aBody = new StringBuffer(mRenderer.render(tupleExpr));
 
-		boolean aFirst = true;
+		boolean aFirst;
 
 		StringBuilder aQuery = new StringBuilder();
 
@@ -94,26 +103,7 @@ public class SPARQLQueryRenderer implements QueryRenderer {
 							aFirst = false;
 						}
 
-						aQuery.append("?" + aElem.getSourceName());
-
-						// SPARQL does not support this, its an artifact of copy and
-						// paste from the serql stuff
-						// aQuery.append(mRenderer.getExtensions().containsKey(aElem.getSourceName())
-						// ?
-						// mRenderer.renderValueExpr(mRenderer.getExtensions().get(aElem.getSourceName()))
-						// : "?"+aElem.getSourceName());
-						//
-						// if (!aElem.getSourceName().equals(aElem.getTargetName()) ||
-						// (mRenderer.getExtensions().containsKey(aElem.getTargetName())
-						// &&
-						// !mRenderer.getExtensions().containsKey(aElem.getSourceName())))
-						// {
-						// aQuery.append(" as
-						// ").append(mRenderer.getExtensions().containsKey(aElem.getTargetName())
-						// ?
-						// mRenderer.renderValueExpr(mRenderer.getExtensions().get(aElem.getTargetName()))
-						// : aElem.getTargetName());
-						// }
+						aQuery.append("?" + aElem.getName());
 					}
 				}
 			}

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.query.resultio.sparqlxml;
 
@@ -77,14 +80,14 @@ class SPARQLResultsSAXParser extends SimpleSAXAdapter {
 	 */
 	private MapBindingSet currentSolution;
 
-	private ValueFactory valueFactory;
+	private final ValueFactory valueFactory;
 
-	private QueryResultHandler handler;
+	private final QueryResultHandler handler;
 
 	/**
 	 * stack for handling nested RDF-star triples
 	 */
-	private Deque<TripleContainer> tripleStack = new ArrayDeque<>();
+	private final Deque<TripleContainer> tripleStack = new ArrayDeque<>();
 
 	public SPARQLResultsSAXParser(ValueFactory valueFactory, QueryResultHandler handler) {
 		this.valueFactory = valueFactory;

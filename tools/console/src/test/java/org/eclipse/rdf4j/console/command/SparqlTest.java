@@ -1,13 +1,17 @@
 /*******************************************************************************
  * Copyright (c) 2018 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.console.command;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -17,8 +21,9 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 
-import org.eclipse.rdf4j.RDF4JException;
+import org.eclipse.rdf4j.common.exception.RDF4JException;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.repository.manager.LocalRepositoryManager;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -91,8 +96,11 @@ public class SparqlTest extends AbstractCommandTest {
 
 		assertTrue(f.exists(), "File does not exist");
 		assertTrue(f.length() > 0, "Empty file");
-
-		Model m = Rio.parse(new FileReader(f), "", RDFFormat.TURTLE);
+		Model m;
+		try (Reader reader = new FileReader(f)) {
+			m = Rio.parse(reader, "", RDFFormat.TURTLE);
+		}
+		assertNotNull(m);
 		assertTrue(m.size() > 0, "Empty model");
 	}
 
@@ -107,8 +115,11 @@ public class SparqlTest extends AbstractCommandTest {
 
 		assertTrue(f.exists(), "File does not exist");
 		assertTrue(f.length() > 0, "Empty file");
-
-		Model m = Rio.parse(new FileReader(f), "", RDFFormat.TURTLE);
+		Model m;
+		try (Reader reader = new FileReader(f)) {
+			m = Rio.parse(reader, "", RDFFormat.TURTLE);
+		}
+		assertNotNull(m);
 		assertTrue(m.size() > 0, "Empty model");
 	}
 

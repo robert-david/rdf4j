@@ -1,9 +1,12 @@
 /*******************************************************************************
- * .Copyright (c) 2020 Eclipse RDF4J contributors.
+ * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.shacl.ast.planNodes;
 
@@ -14,7 +17,6 @@ import java.util.Queue;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.sail.SailException;
-import org.eclipse.rdf4j.sail.shacl.GlobalValidationExecutionLogging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +38,7 @@ public class BufferedPlanNode<T extends MultiStreamPlanNode & PlanNode> implemen
 
 	@Override
 	public CloseableIteration<? extends ValidationTuple, SailException> iterator() {
-		return new CloseableIteration<ValidationTuple, SailException>() {
+		return new CloseableIteration<>() {
 
 			{
 				parent.init();
@@ -50,12 +52,15 @@ public class BufferedPlanNode<T extends MultiStreamPlanNode & PlanNode> implemen
 
 			@Override
 			public boolean hasNext() throws SailException {
+				if (closed) {
+					return false;
+				}
 				calculateNext();
 				return !buffer.isEmpty();
 			}
 
 			private void calculateNext() {
-
+				assert !closed;
 				while (buffer.isEmpty()) {
 					boolean success = parent.incrementIterator();
 					if (!success) {
@@ -71,10 +76,10 @@ public class BufferedPlanNode<T extends MultiStreamPlanNode & PlanNode> implemen
 			public ValidationTuple next() throws SailException {
 				calculateNext();
 				ValidationTuple tuple = buffer.remove();
-				if (GlobalValidationExecutionLogging.loggingEnabled) {
+				if (validationExecutionLogger.isEnabled()) {
 					validationExecutionLogger.log(depth(),
-							parent.getClass().getSimpleName() + ":Buffered:" + name + ".next()", tuple, parent,
-							getId(), null);
+							parent.getClass().getSimpleName() + ":Buffered:" + name + ".next()", tuple, parent, getId(),
+							null);
 				}
 				return tuple;
 			}

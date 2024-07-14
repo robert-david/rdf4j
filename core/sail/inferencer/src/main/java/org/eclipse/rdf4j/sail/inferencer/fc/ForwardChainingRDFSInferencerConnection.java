@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.inferencer.fc;
 
@@ -29,10 +32,10 @@ import org.slf4j.LoggerFactory;
  * inferencer can be used to add RDF Schema semantics to any Sail that returns {@link InferencerConnection}s from their
  * {@link Sail#getConnection()} method.
  *
- * @deprecated since 2.5. This inferencer implementation will be phased out. Consider switching to the
+ * @deprecated This inferencer implementation will be phased out. Consider switching to the
  *             {@link SchemaCachingRDFSInferencer} instead.
  */
-@Deprecated
+@Deprecated(since = "2.5")
 class ForwardChainingRDFSInferencerConnection extends AbstractForwardChainingInferencerConnection {
 
 	static private final Logger logger = LoggerFactory.getLogger(ForwardChainingRDFSInferencerConnection.class);
@@ -46,17 +49,17 @@ class ForwardChainingRDFSInferencerConnection extends AbstractForwardChainingInf
 	/**
 	 * Flags indicating which rules should be evaluated.
 	 */
-	private boolean[] checkRule = new boolean[RDFSRules.RULECOUNT];
+	private final boolean[] checkRule = new boolean[RDFSRules.RULECOUNT];
 
 	/**
 	 * Flags indicating which rules should be evaluated next iteration.
 	 */
-	private boolean[] checkRuleNextIter = new boolean[RDFSRules.RULECOUNT];
+	private final boolean[] checkRuleNextIter = new boolean[RDFSRules.RULECOUNT];
 
 	/**
 	 * The number of inferred statements per rule.
 	 */
-	private int[] ruleCount = new int[RDFSRules.RULECOUNT];
+	private final int[] ruleCount = new int[RDFSRules.RULECOUNT];
 
 	/*--------------*
 	 * Constructors *
@@ -222,7 +225,7 @@ class ForwardChainingRDFSInferencerConnection extends AbstractForwardChainingInf
 		if (!checkRule[rule]) {
 			return 0;
 		}
-		int nofInferred = 0;
+		int nofInferred;
 
 		nofInferred = applyRuleInternal(rule);
 
@@ -232,7 +235,7 @@ class ForwardChainingRDFSInferencerConnection extends AbstractForwardChainingInf
 	}
 
 	protected int applyRuleInternal(int rule) throws SailException {
-		int result = 0;
+		int result;
 
 		switch (rule) {
 		case RDFSRules.Rdf1:

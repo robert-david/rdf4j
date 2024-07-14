@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.helpers;
 
@@ -105,8 +108,7 @@ public class BasicParserSettings {
 			"org.eclipse.rdf4j.rio.verify_language_tags", "Verify language tags", Boolean.TRUE);
 
 	/**
-	 * Boolean setting for parser to determine whether languages need to be normalized, and to which format they should
-	 * be normalized.
+	 * Boolean setting for parser to determine whether languages need to be normalized.
 	 * <p>
 	 * Normalization is performed using registered {@link LanguageHandler}s.
 	 * <p>
@@ -121,7 +123,7 @@ public class BasicParserSettings {
 	 * Setting used to specify which {@link LanguageHandler} implementations are to be used for a given parser
 	 * configuration.
 	 * <p>
-	 * Defaults to an RFC3066 LanguageHandler implementation based on {@link LanguageHandler#RFC3066}.
+	 * Defaults to an BCP47 LanguageHandler implementation based on {@link LanguageHandler#BCP47}.
 	 */
 	public static final RioSetting<List<LanguageHandler>> LANGUAGE_HANDLERS;
 

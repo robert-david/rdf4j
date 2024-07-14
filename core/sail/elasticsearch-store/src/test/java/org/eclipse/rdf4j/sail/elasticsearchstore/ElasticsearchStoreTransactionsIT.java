@@ -1,17 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.elasticsearchstore;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -23,9 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.assertj.core.util.Files;
-import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.common.transaction.IsolationLevels;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -43,52 +44,21 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.sail.NotifyingSailConnection;
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
-
-public class ElasticsearchStoreTransactionsIT {
+public class ElasticsearchStoreTransactionsIT extends AbstractElasticsearchStoreIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(ElasticsearchStoreTransactionsIT.class);
 	private static final SimpleValueFactory vf = SimpleValueFactory.getInstance();
-
-	private static EmbeddedElastic embeddedElastic;
-
-	private static File installLocation = Files.newTemporaryFolder();
-
 	private static ElasticsearchStore elasticsearchStore;
 
-	@BeforeClass
-	public static void beforeClass() throws IOException, InterruptedException {
-
-		embeddedElastic = TestHelpers.startElasticsearch(installLocation);
-
-		elasticsearchStore = new ElasticsearchStore("localhost", embeddedElastic.getTransportTcpPort(), "cluster1",
-				"test");
-
-	}
-
-	@AfterClass
-	public static void afterClass() throws IOException {
-
-		elasticsearchStore.shutDown();
-		TestHelpers.stopElasticsearch(embeddedElastic, installLocation);
-	}
-
-	@Before
+	@BeforeEach
 	public void before() throws UnknownHostException {
-
+		elasticsearchStore = new ElasticsearchStore("localhost", TestHelpers.PORT, TestHelpers.CLUSTER, "testindex");
 		elasticsearchStore.setElasticsearchScrollTimeout(60000);
 
 		try (NotifyingSailConnection connection = elasticsearchStore.getConnection()) {
@@ -96,7 +66,6 @@ public class ElasticsearchStoreTransactionsIT {
 			connection.removeStatements(null, null, null);
 			connection.commit();
 		}
-
 	}
 
 	public static void logTime(StopWatch stopWatch, String message, TimeUnit timeUnit) {
@@ -113,52 +82,6 @@ public class ElasticsearchStoreTransactionsIT {
 
 	}
 
-	private void printAllDocs() {
-		for (String index : getIndexes()) {
-			System.out.println();
-			System.out.println("INDEX: " + index);
-			try {
-				List<String> strings = embeddedElastic.fetchAllDocuments(index);
-
-				for (String string : strings) {
-					System.out.println(string);
-					System.out.println();
-				}
-
-			} catch (UnknownHostException e) {
-				throw new RuntimeException(e);
-			}
-
-			System.out.println();
-		}
-	}
-
-	private void deleteAllIndexes() {
-		for (String index : getIndexes()) {
-			System.out.println("deleting: " + index);
-			embeddedElastic.deleteIndex(index);
-
-		}
-	}
-
-	private String[] getIndexes() {
-
-		Settings settings = Settings.builder().put("cluster.name", "cluster1").build();
-		try (TransportClient client = new PreBuiltTransportClient(settings)) {
-			client.addTransportAddress(
-					new TransportAddress(InetAddress.getByName("localhost"), embeddedElastic.getTransportTcpPort()));
-
-			return client.admin()
-					.indices()
-					.getIndex(new GetIndexRequest())
-					.actionGet()
-					.getIndices();
-		} catch (UnknownHostException e) {
-			throw new IllegalStateException(e);
-		}
-
-	}
-
 	@Test
 	public void testAddData() {
 		try (NotifyingSailConnection connection = elasticsearchStore.getConnection()) {
@@ -166,7 +89,6 @@ public class ElasticsearchStoreTransactionsIT {
 			connection.addStatement(RDF.TYPE, RDF.TYPE, RDFS.RESOURCE);
 			connection.commit();
 		}
-
 	}
 
 	@Test
@@ -401,7 +323,7 @@ public class ElasticsearchStoreTransactionsIT {
 	}
 
 	@Test
-	public void testGetDataSailRepositoryContextIRI() {
+	public void testGetDataSailRepositoryContextIRI() throws IOException {
 		SailRepository elasticsearchStore = new SailRepository(this.elasticsearchStore);
 		try (SailRepositoryConnection connection = elasticsearchStore.getConnection()) {
 
@@ -485,8 +407,8 @@ public class ElasticsearchStoreTransactionsIT {
 		SailRepository elasticsearchStore = new SailRepository(this.elasticsearchStore);
 		try (SailRepositoryConnection connection = elasticsearchStore.getConnection()) {
 			connection.begin(IsolationLevels.NONE);
-			connection.add(
-					ElasticsearchStoreTransactionsIT.class.getClassLoader().getResourceAsStream("testFile.ttl"), "",
+			connection.add(ElasticsearchStoreTransactionsIT.class.getClassLoader().getResourceAsStream("testFile.ttl"),
+					"",
 					RDFFormat.TURTLE);
 			connection.commit();
 
@@ -666,33 +588,34 @@ public class ElasticsearchStoreTransactionsIT {
 
 	// TODO: this throws a SearchPhaseExecutionException, even thought it should have gotten wrapped at some point in a
 	// RepositoryException or something like that
-	@Ignore("slow test")
-	@Test(expected = RepositoryException.class)
+	@Disabled("slow test")
+	@Test
 	public void testScrollTimeout() throws InterruptedException {
-		SailRepository elasticsearchStore = new SailRepository(this.elasticsearchStore);
-		this.elasticsearchStore.setElasticsearchScrollTimeout(1);
+		assertThrows(RepositoryException.class, () -> {
+			SailRepository elasticsearchStore = new SailRepository(this.elasticsearchStore);
+			this.elasticsearchStore.setElasticsearchScrollTimeout(1);
 
-		try (SailRepositoryConnection connection = elasticsearchStore.getConnection()) {
+			try (SailRepositoryConnection connection = elasticsearchStore.getConnection()) {
 
-			connection.begin(IsolationLevels.NONE);
-			for (int i = 0; i < 2000; i++) {
-				connection.add(RDF.TYPE, RDF.TYPE, vf.createLiteral(i));
+				connection.begin(IsolationLevels.NONE);
+				for (int i = 0; i < 2000; i++) {
+					connection.add(RDF.TYPE, RDF.TYPE, vf.createLiteral(i));
 
-			}
-			connection.commit();
-
-			try (RepositoryResult<Statement> statements = connection.getStatements(null, null, null, false)) {
-				int count = 0;
-				while (statements.hasNext()) {
-					if (count++ % 1000 == 999) {
-						Thread.sleep(60000);
-					}
-					statements.next();
 				}
+				connection.commit();
+
+				try (RepositoryResult<Statement> statements = connection.getStatements(null, null, null, false)) {
+					int count = 0;
+					while (statements.hasNext()) {
+						if (count++ % 1000 == 999) {
+							Thread.sleep(60000);
+						}
+						statements.next();
+					}
+				}
+
 			}
-
-		}
-
+		});
 	}
 
 	@Test

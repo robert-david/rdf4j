@@ -1,13 +1,16 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.turtle;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -20,19 +23,19 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.WriterConfig;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.helpers.TurtleWriterSettings;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Arjohn Kampman
  */
 public class TurtleWriterTest extends AbstractTurtleWriterTest {
 
-	private IRI uri1;
+	private final IRI uri1;
 
-	private IRI uri2;
+	private final IRI uri2;
 
-	private String exNs;
+	private final String exNs;
 
 	public TurtleWriterTest() {
 		super(new TurtleWriterFactory(), new TurtleParserFactory());
@@ -121,7 +124,6 @@ public class TurtleWriterTest extends AbstractTurtleWriterTest {
 
 	/**
 	 * Test that blank node subjects are processed in correct order even when not supplied in order.
-	 *
 	 */
 	@Test
 	public void testBlanknodeInlining_SubjectOrder() throws Exception {
@@ -191,7 +193,7 @@ public class TurtleWriterTest extends AbstractTurtleWriterTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void anotherBnodeTest() throws Exception {
 		String data = "@prefix ex:    <http://example.com/ns#> .\n" +
 				"@prefix sh:    <http://www.w3.org/ns/shacl#> .\n" +

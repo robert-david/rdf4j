@@ -1,9 +1,12 @@
 /*******************************************************************************
- * .Copyright (c) 2020 Eclipse RDF4J contributors.
+ * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.shacl.ast.planNodes;
@@ -27,9 +30,8 @@ public class SetFilterNode implements PlanNode {
 	private ValidationExecutionLogger validationExecutionLogger;
 
 	public SetFilterNode(Set<Value> targetNodeList, PlanNode parent, int index, boolean returnValid) {
-		parent = PlanNodeHelper.handleSorting(this, parent);
+		this.parent = PlanNodeHelper.handleSorting(this, parent);
 		this.targetNodeList = targetNodeList;
-		this.parent = parent;
 		this.index = index;
 		this.returnValid = returnValid;
 	}
@@ -38,13 +40,18 @@ public class SetFilterNode implements PlanNode {
 	public CloseableIteration<? extends ValidationTuple, SailException> iterator() {
 		return new LoggingCloseableIteration(this, validationExecutionLogger) {
 
-			final CloseableIteration<? extends ValidationTuple, SailException> iterator = parent.iterator();
+			private CloseableIteration<? extends ValidationTuple, SailException> parentIterator;
 
 			ValidationTuple next;
 
+			@Override
+			protected void init() {
+				parentIterator = parent.iterator();
+			}
+
 			private void calulateNext() {
-				while (next == null && iterator.hasNext()) {
-					ValidationTuple temp = iterator.next();
+				while (next == null && parentIterator.hasNext()) {
+					ValidationTuple temp = parentIterator.next();
 					boolean contains = targetNodeList.contains(temp.getActiveTarget());
 					if (returnValid && contains) {
 						next = temp;
@@ -55,18 +62,20 @@ public class SetFilterNode implements PlanNode {
 			}
 
 			@Override
-			public void localClose() throws SailException {
-				iterator.close();
+			public void localClose() {
+				if (parentIterator != null) {
+					parentIterator.close();
+				}
 			}
 
 			@Override
-			protected boolean localHasNext() throws SailException {
+			protected boolean localHasNext() {
 				calulateNext();
 				return next != null;
 			}
 
 			@Override
-			protected ValidationTuple loggingNext() throws SailException {
+			protected ValidationTuple loggingNext() {
 				calulateNext();
 
 				ValidationTuple temp = next;

@@ -1,9 +1,12 @@
-/******************************************************************************* 
- * Copyright (c) 2021 Eclipse RDF4J contributors. 
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Distribution License v1.0 
- * which accompanies this distribution, and is available at 
- * http://www.eclipse.org/org/documents/edl-v10.php. 
+/*******************************************************************************
+ * Copyright (c) 2021 Eclipse RDF4J contributors.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Distribution License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio.turtle;
 
@@ -11,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -22,15 +26,14 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.WriterConfig;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests on blank node inlining behavior of the TurtleWriter.
  *
+ * @author Jeen Broekstra
  * @implNote added as integration test instead of unit test because we reuse code from rdf4j-queryalgebra-evaluation
  *           (for statement sorting), which would introduce a cyclic dependency in the rio-turtle module.
- * 
- * @author Jeen Broekstra
  */
 public class TurtleWriterInliningTest {
 
@@ -53,7 +56,7 @@ public class TurtleWriterInliningTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		Rio.write(model, baos, RDFFormat.TURTLE, writerConfig);
 
-		String actual = baos.toString("UTF-8");
+		String actual = baos.toString(StandardCharsets.UTF_8);
 
 		assertThat(actual).contains(inlinedListTurtle);
 	}

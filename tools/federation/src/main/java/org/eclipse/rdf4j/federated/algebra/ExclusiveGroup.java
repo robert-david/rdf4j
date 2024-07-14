@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.federated.algebra;
 
@@ -16,7 +19,6 @@ import java.util.Set;
 
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.federated.endpoint.Endpoint;
-import org.eclipse.rdf4j.federated.evaluation.FederationEvalStrategy;
 import org.eclipse.rdf4j.federated.structures.QueryInfo;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -50,9 +52,7 @@ public class ExclusiveGroup extends AbstractQueryModelNode
 	protected FilterValueExpr filterExpr = null;
 	protected QueryBindingSet boundFilters = null; // contains bound filter bindings, that need to be added as
 	// additional bindings
-	protected transient Endpoint ownedEndpoint = null;
-
-	private final FederationEvalStrategy strategy;
+	protected transient Endpoint ownedEndpoint;
 
 	public ExclusiveGroup(Collection<? extends ExclusiveTupleExpr> ownedNodes, StatementSource owner,
 			QueryInfo queryInfo) {
@@ -62,8 +62,6 @@ public class ExclusiveGroup extends AbstractQueryModelNode
 		this.id = NodeFactory.getNextId();
 		this.queryInfo = queryInfo;
 		ownedEndpoint = queryInfo.getFederationContext().getEndpointManager().getEndpoint(owner.getEndpointID());
-
-		strategy = queryInfo.getFederationContext().getStrategy();
 
 		ownedNodes.forEach(node -> node.setParentNode(this));
 	}
@@ -167,7 +165,7 @@ public class ExclusiveGroup extends AbstractQueryModelNode
 
 		try {
 			// use the particular evaluation strategy for evaluation
-			return strategy.evaluateExclusiveGroup(this, bindings);
+			return queryInfo.getStrategy().evaluateExclusiveGroup(this, bindings);
 		} catch (RepositoryException | MalformedQueryException e) {
 			throw new QueryEvaluationException(e);
 		}

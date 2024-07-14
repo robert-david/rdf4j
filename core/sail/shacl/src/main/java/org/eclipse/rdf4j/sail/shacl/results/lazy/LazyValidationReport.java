@@ -1,16 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.shacl.results.lazy;
 
 import static org.eclipse.rdf4j.model.util.Values.literal;
 
-import java.util.Arrays;
+import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.List;
 
@@ -18,16 +21,25 @@ import org.eclipse.rdf4j.common.annotation.InternalUseOnly;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.BooleanLiteral;
+import org.eclipse.rdf4j.model.impl.DynamicModel;
 import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
+import org.eclipse.rdf4j.model.vocabulary.DASH;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDF4J;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.RSX;
 import org.eclipse.rdf4j.model.vocabulary.SHACL;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.WriterConfig;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.sail.shacl.results.ValidationReport;
 import org.eclipse.rdf4j.sail.shacl.results.ValidationResult;
 
 /**
  * A ValidationReport that will defer calculating any ValidationResults until the user asks for them
- *
  */
 @InternalUseOnly
 public class LazyValidationReport extends ValidationReport {
@@ -84,11 +96,19 @@ public class LazyValidationReport extends ValidationReport {
 	}
 
 	public Model asModel() {
-		return asModel(new DynamicModelFactory().createEmptyModel());
-	}
+		DynamicModel emptyModel = new DynamicModelFactory().createEmptyModel();
+		emptyModel.setNamespace(SHACL.NS);
+		emptyModel.setNamespace(RSX.NS);
+		emptyModel.setNamespace(DASH.NS);
 
-	public Resource getId() {
-		return id;
+		emptyModel.setNamespace(RDF.NS);
+		emptyModel.setNamespace(RDFS.NS);
+		emptyModel.setNamespace(OWL.NS);
+		emptyModel.setNamespace(XSD.NS);
+
+		emptyModel.setNamespace(RDF4J.NS);
+
+		return asModel(emptyModel);
 	}
 
 	/**
@@ -109,10 +129,17 @@ public class LazyValidationReport extends ValidationReport {
 
 	@Override
 	public String toString() {
-		return "LazyValidationReport{" +
-				"conforms=" + conforms +
-				", validationResult=" + Arrays.toString(validationResult.toArray()) +
-				'}';
+		StringWriter stringWriter = new StringWriter();
+
+		WriterConfig writerConfig = new WriterConfig()
+				.set(BasicWriterSettings.PRETTY_PRINT, true)
+				.set(BasicWriterSettings.INLINE_BLANK_NODES, true);
+
+		Rio.write(asModel(), stringWriter, RDFFormat.TURTLE, writerConfig);
+
+		return stringWriter.toString()
+				.replaceAll("(?m)^(@prefix)(.*)(\\.)$", "") // remove all lines that are prefix declarations
+				.trim();
 	}
 
 	public boolean isTruncated() {

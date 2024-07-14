@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.repository.sail;
 
@@ -23,14 +26,13 @@ import org.eclipse.rdf4j.query.Query;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.sail.SailConnection;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link SailRepositoryConnection}
  *
  * @author Jeen Broekstra
- *
  */
 public class SailRepositoryConnectionTest {
 
@@ -38,7 +40,7 @@ public class SailRepositoryConnectionTest {
 	private SailConnection sailConnection;
 	private SailRepository sailRepository;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		sailConnection = mock(SailConnection.class);
 		sailRepository = mock(SailRepository.class);

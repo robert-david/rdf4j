@@ -1,13 +1,17 @@
-/**
- * Copyright (c) 2015 Eclipse RDF4J contributors, and others.
+/*******************************************************************************
+ * Copyright (c) 2015 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
- */
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ ******************************************************************************/
+
 package org.eclipse.rdf4j.http.server.repository.statements;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 
@@ -15,9 +19,9 @@ import org.eclipse.rdf4j.http.protocol.Protocol;
 import org.eclipse.rdf4j.http.server.ClientHTTPException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.Update;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpMethod;
 
@@ -28,7 +32,7 @@ public class TestStatementsController extends TestStatementsCommon {
 
 	private final StatementsController controller = new StatementsController();
 
-	@Before
+	@BeforeEach
 	public void initMocks() {
 		request.setMethod(HttpMethod.POST.name());
 

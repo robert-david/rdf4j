@@ -1,20 +1,20 @@
 /*******************************************************************************
  * Copyright (c) 2018 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.query.algebra.evaluation.impl;
 
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.FN;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.algebra.Compare;
 import org.eclipse.rdf4j.query.algebra.FunctionCall;
 import org.eclipse.rdf4j.query.algebra.Regex;
-import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.algebra.ValueExpr;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
@@ -24,23 +24,21 @@ import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
  * A query optimizer that replaces REGEX with {@link FunctionCall}s that are equivalent operators
  *
  * @author Jerven Bolleman
+ * @deprecated since 4.1.0. Use
+ *             {@link org.eclipse.rdf4j.query.algebra.evaluation.optimizer.RegexAsStringFunctionOptimizer} instead.
  */
-public class RegexAsStringFunctionOptimizer implements QueryOptimizer {
+@Deprecated(forRemoval = true, since = "4.1.0")
+public class RegexAsStringFunctionOptimizer extends
+		org.eclipse.rdf4j.query.algebra.evaluation.optimizer.RegexAsStringFunctionOptimizer implements QueryOptimizer {
 
-	private final ValueFactory vf;
+	private final ValueFactory factory;
 
 	public RegexAsStringFunctionOptimizer(ValueFactory vf) {
-		this.vf = vf;
+		super(vf);
+		this.factory = vf;
 	}
 
-	/**
-	 * Applies generally applicable optimizations to the supplied query: variable assignments are inlined.
-	 */
-	@Override
-	public void optimize(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {
-		tupleExpr.visit(new RegexAsStringFunctionVisitor());
-	}
-
+	@Deprecated(forRemoval = true, since = "4.1.0")
 	protected class RegexAsStringFunctionVisitor extends AbstractQueryModelVisitor<RuntimeException> {
 
 		@Override
@@ -89,7 +87,7 @@ public class RegexAsStringFunctionOptimizer implements QueryOptimizer {
 		private void strendsCandidate(Regex node, String regex) {
 			final String potential = regex.substring(0, regex.length() - 1);
 			if (plain(potential)) {
-				ValueConstant vc = new ValueConstant(vf.createLiteral(potential));
+				ValueConstant vc = new ValueConstant(factory.createLiteral(potential));
 				node.replaceWith(new FunctionCall(FN.ENDS_WITH.stringValue(), node.getArg(), vc));
 			}
 		}
@@ -97,7 +95,7 @@ public class RegexAsStringFunctionOptimizer implements QueryOptimizer {
 		private void strstartsCandidate(Regex node, String regex) {
 			final String potential = regex.substring(1, regex.length());
 			if (plain(potential)) {
-				ValueConstant vc = new ValueConstant(vf.createLiteral(potential));
+				ValueConstant vc = new ValueConstant(factory.createLiteral(potential));
 				node.replaceWith(new FunctionCall(FN.STARTS_WITH.stringValue(), node.getArg(), vc));
 			}
 		}
@@ -105,7 +103,7 @@ public class RegexAsStringFunctionOptimizer implements QueryOptimizer {
 		private void equalsCandidate(Regex node, String regex) {
 			final String potential = regex.substring(1, regex.length() - 1);
 			if (plain(potential)) {
-				ValueConstant vc = new ValueConstant(vf.createLiteral(potential));
+				ValueConstant vc = new ValueConstant(factory.createLiteral(potential));
 				node.replaceWith(new Compare(node.getArg(), vc, Compare.CompareOp.EQ));
 			}
 		}

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.http.server.repository.transaction;
 
@@ -41,17 +44,17 @@ public enum ActiveTransactionRegistry {
 	 * Configurable system property {@code rdf4j.server.txn.registry.timeout} for specifying the transaction cache
 	 * timeout (in seconds).
 	 *
-	 * @deprecated since 2.3 use {@link Protocol#CACHE_TIMEOUT_PROPERTY}
+	 * @deprecated Use {@link Protocol#CACHE_TIMEOUT_PROPERTY}
 	 */
-	@Deprecated
+	@Deprecated(since = "2.3")
 	public static final String CACHE_TIMEOUT_PROPERTY = Protocol.TIMEOUT.CACHE_PROPERTY;
 
 	/**
 	 * Default timeout setting for transaction cache entries (in seconds).
 	 *
-	 * @deprecated since 2.3 use {@link Protocol#DEFAULT_TIMEOUT}
+	 * @deprecated Use {@link Protocol#DEFAULT_TIMEOUT}
 	 */
-	@Deprecated
+	@Deprecated(since = "2.3")
 	public final static int DEFAULT_TIMEOUT = Protocol.TIMEOUT.DEFAULT;
 
 	/**
@@ -71,7 +74,7 @@ public enum ActiveTransactionRegistry {
 	 * there if remote clients are gone
 	 */
 	private final ScheduledExecutorService cleaupSecondaryCacheScheduler;
-	private ScheduledFuture<?> cleanupTask = null;
+	private ScheduledFuture<?> cleanupTask;
 
 	private Cache<UUID, Transaction> getSecondaryCache() {
 		return secondaryCache;
@@ -80,7 +83,7 @@ public enum ActiveTransactionRegistry {
 	/**
 	 * private constructor.
 	 */
-	private ActiveTransactionRegistry() {
+	ActiveTransactionRegistry() {
 		final String configuredValue = System.getProperty(Protocol.CACHE_TIMEOUT_PROPERTY);
 		if (configuredValue != null) {
 			try {

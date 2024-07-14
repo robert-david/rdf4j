@@ -1,33 +1,36 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.nativerdf;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
 
 import org.eclipse.rdf4j.sail.nativerdf.TxnStatusFile.TxnStatus;
 import org.eclipse.rdf4j.sail.nativerdf.btree.RecordIterator;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * An extension of RDFStoreTest for testing the class {@link NativeStore}.
  */
 public class TripleStoreRecoveryTest {
-	@Rule
-	public final TemporaryFolder tmpDir = new TemporaryFolder();
+
+	@TempDir
+	File dataDir;
 
 	@Test
 	public void testRollbackRecovery() throws Exception {
-		File dataDir = tmpDir.getRoot();
 		TripleStore tripleStore = new TripleStore(dataDir, "spoc");
 		try {
 			tripleStore.startTransaction();
@@ -50,7 +53,6 @@ public class TripleStoreRecoveryTest {
 
 	@Test
 	public void testCommitRecovery() throws Exception {
-		File dataDir = tmpDir.getRoot();
 		TripleStore tripleStore = new TripleStore(dataDir, "spoc");
 		try {
 			tripleStore.startTransaction();
@@ -80,5 +82,4 @@ public class TripleStoreRecoveryTest {
 			tripleStore.close();
 		}
 	}
-
 }

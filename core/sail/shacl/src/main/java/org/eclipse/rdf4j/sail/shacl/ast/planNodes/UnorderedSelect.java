@@ -1,13 +1,17 @@
 /*******************************************************************************
- * .Copyright (c) 2020 Eclipse RDF4J contributors.
+ * Copyright (c) 2020 Eclipse RDF4J contributors.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 
 package org.eclipse.rdf4j.sail.shacl.ast.planNodes;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -36,17 +40,20 @@ public class UnorderedSelect implements PlanNode {
 	private final Resource subject;
 	private final IRI predicate;
 	private final Value object;
+	private final Resource[] dataGraph;
 	private final Function<Statement, ValidationTuple> mapper;
 
 	private boolean printed = false;
 	private ValidationExecutionLogger validationExecutionLogger;
 
 	public UnorderedSelect(SailConnection connection, Resource subject, IRI predicate, Value object,
-			Function<Statement, ValidationTuple> mapper) {
+			Resource[] dataGraph, Function<Statement, ValidationTuple> mapper) {
 		this.connection = connection;
+		assert this.connection != null;
 		this.subject = subject;
 		this.predicate = predicate;
 		this.object = object;
+		this.dataGraph = dataGraph;
 		this.mapper = mapper;
 	}
 
@@ -54,22 +61,28 @@ public class UnorderedSelect implements PlanNode {
 	public CloseableIteration<? extends ValidationTuple, SailException> iterator() {
 		return new LoggingCloseableIteration(this, validationExecutionLogger) {
 
-			final CloseableIteration<? extends Statement, SailException> statements = connection.getStatements(subject,
-					predicate, object, true);
+			CloseableIteration<? extends Statement, SailException> statements;
 
 			@Override
-			public void localClose() throws SailException {
-				statements.close();
+			protected void init() {
+				assert statements == null;
+				statements = connection.getStatements(subject, predicate, object, true, dataGraph);
 			}
 
 			@Override
-			protected boolean localHasNext() throws SailException {
+			public void localClose() {
+				if (statements != null) {
+					statements.close();
+				}
+			}
+
+			@Override
+			protected boolean localHasNext() {
 				return statements.hasNext();
 			}
 
 			@Override
-			protected ValidationTuple loggingNext() throws SailException {
-
+			protected ValidationTuple loggingNext() {
 				return mapper.apply(statements.next());
 			}
 
@@ -149,12 +162,14 @@ public class UnorderedSelect implements PlanNode {
 					Objects.equals(subject, that.subject) &&
 					Objects.equals(predicate, that.predicate) &&
 					Objects.equals(object, that.object) &&
+					Arrays.equals(dataGraph, that.dataGraph) &&
 					mapper.equals(that.mapper);
 		} else {
-			return connection.equals(that.connection) &&
+			return Objects.equals(connection, that.connection) &&
 					Objects.equals(subject, that.subject) &&
 					Objects.equals(predicate, that.predicate) &&
 					Objects.equals(object, that.object) &&
+					Arrays.equals(dataGraph, that.dataGraph) &&
 					mapper.equals(that.mapper);
 		}
 
@@ -165,10 +180,11 @@ public class UnorderedSelect implements PlanNode {
 		// added/removed connections are always newly minted per plan node, so we instead need to compare the underlying
 		// sail
 		if (connection instanceof MemoryStoreConnection) {
-			return Objects.hash(((MemoryStoreConnection) connection).getSail(), subject, predicate, object, mapper);
+			return Objects.hash(((MemoryStoreConnection) connection).getSail(), subject, predicate, object, mapper,
+					Arrays.hashCode(dataGraph));
 		}
 
-		return Objects.hash(connection, subject, predicate, object, mapper);
+		return Objects.hash(connection, subject, predicate, object, mapper, Arrays.hashCode(dataGraph));
 	}
 
 	public static class Mapper {
@@ -187,7 +203,7 @@ public class UnorderedSelect implements PlanNode {
 
 			@Override
 			public ValidationTuple apply(Statement s) {
-				return new ValidationTuple(s.getSubject(), scope, false);
+				return new ValidationTuple(s.getSubject(), scope, false, s.getContext());
 			}
 
 			@Override
@@ -231,7 +247,7 @@ public class UnorderedSelect implements PlanNode {
 
 			@Override
 			public ValidationTuple apply(Statement s) {
-				return new ValidationTuple(s.getObject(), scope, false);
+				return new ValidationTuple(s.getObject(), scope, false, s.getContext());
 			}
 
 			@Override
@@ -270,7 +286,7 @@ public class UnorderedSelect implements PlanNode {
 			@Override
 			public ValidationTuple apply(Statement s) {
 				return new ValidationTuple(s.getSubject(), s.getObject(), ConstraintComponent.Scope.propertyShape,
-						true);
+						true, s.getContext());
 			}
 
 			@Override

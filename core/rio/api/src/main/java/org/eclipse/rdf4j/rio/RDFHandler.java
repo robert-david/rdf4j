@@ -1,18 +1,21 @@
 /*******************************************************************************
  * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.rio;
 
 import org.eclipse.rdf4j.model.Statement;
 
 /**
- * An interface defining methods related to RDF data handling. <tt>RDFHandler</tt> is both used as a "consumer" and as a
- * "producer" interface. As such it can be used both as an interface for receiving RDF data, for example by listening to
- * the results of an RDF parser, and as an interface for reporting RDF data, for example to an object that serializes
+ * An interface defining methods related to RDF data handling. <var>RDFHandler</var> is both used as a "consumer" and as
+ * a "producer" interface. As such it can be used both as an interface for receiving RDF data, for example by listening
+ * to the results of an RDF parser, and as an interface for reporting RDF data, for example to an object that serializes
  * RDF data to an RDF/XML document.
  */
 public interface RDFHandler {

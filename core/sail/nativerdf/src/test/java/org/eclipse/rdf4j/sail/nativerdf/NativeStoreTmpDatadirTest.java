@@ -1,77 +1,76 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eclipse RDF4J contributors,.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Distribution License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *******************************************************************************/
 package org.eclipse.rdf4j.sail.nativerdf;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class NativeStoreTmpDatadirTest {
 
-	@Rule
-	public TemporaryFolder tempFolder = new TemporaryFolder();
+	@TempDir
+	File dataDir;
 
 	@Test
-	public void testNoTmpDatadir() throws IOException {
-		File dataDir = tempFolder.newFolder();
+	public void testNoTmpDatadir() {
 		NativeStore store = new NativeStore(dataDir);
 
-		store.initialize();
-		assertTrue("Data dir not set correctly", dataDir.equals(store.getDataDir()));
+		store.init();
+		assertTrue(dataDir.equals(store.getDataDir()), "Data dir not set correctly");
 
 		store.shutDown();
-		assertTrue("Data dir does not exist anymore", dataDir.exists());
+		assertTrue(dataDir.exists(), "Data dir does not exist anymore");
 	}
 
 	@Test
-	public void testTmpDatadir() throws IOException {
+	public void testTmpDatadir() {
 		NativeStore store = new NativeStore();
-		store.initialize();
+		store.init();
 		File dataDir = store.getDataDir();
-		assertTrue("Temp data dir not created", dataDir != null && dataDir.exists());
+		assertTrue(dataDir != null && dataDir.exists(), "Temp data dir not created");
 
 		store.shutDown();
-		assertFalse("Temp data dir still exists", dataDir.exists());
+		assertFalse(dataDir.exists(), "Temp data dir still exists");
 	}
 
 	@Test
-	public void testTmpDatadirReinit() throws IOException {
+	public void testTmpDatadirReinit() {
 		NativeStore store = new NativeStore();
-		store.initialize();
+		store.init();
 		File dataDir1 = store.getDataDir();
 		store.shutDown();
 
-		store.initialize();
+		store.init();
 		File dataDir2 = store.getDataDir();
 		store.shutDown();
-		assertFalse("Temp data dirs are the same", dataDir1.equals(dataDir2));
+		assertFalse(dataDir1.equals(dataDir2), "Temp data dirs are the same");
 	}
 
 	@Test
-	public void testDatadirMix() throws IOException {
-		File dataDir = tempFolder.newFolder();
+	public void testDatadirMix() {
 		NativeStore store = new NativeStore(dataDir);
 
-		store.initialize();
+		store.init();
 		store.shutDown();
 
 		store.setDataDir(null);
-		store.initialize();
+		store.init();
 		File tmpDataDir = store.getDataDir();
 		store.shutDown();
 
-		assertFalse("Temp data dir still exists", tmpDataDir.exists());
-		assertTrue("Data dir does not exist anymore", dataDir.exists());
+		assertFalse(tmpDataDir.exists(), "Temp data dir still exists");
+		assertTrue(dataDir.exists(), "Data dir does not exist anymore");
 	}
 }

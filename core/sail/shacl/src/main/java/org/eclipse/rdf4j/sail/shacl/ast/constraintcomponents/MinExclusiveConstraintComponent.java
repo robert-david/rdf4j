@@ -30,7 +30,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.planNodes.PlanNode;
 
 public class MinExclusiveConstraintComponent extends SimpleAbstractConstraintComponent {
 
-	Literal minExclusive;
+	private Literal minExclusive;
 
 	public MinExclusiveConstraintComponent(Literal minExclusive) {
 		this.minExclusive = minExclusive;
@@ -70,4 +70,7 @@ public class MinExclusiveConstraintComponent extends SimpleAbstractConstraintCom
 		return List.of();
 	}
 
+	public Literal getMinExclusive() {
+		return minExclusive;
+	}
 }

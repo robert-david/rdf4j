@@ -30,7 +30,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.planNodes.PlanNode;
 
 public class MaxExclusiveConstraintComponent extends SimpleAbstractConstraintComponent {
 
-	Literal maxExclusive;
+	private Literal maxExclusive;
 
 	public MaxExclusiveConstraintComponent(Literal maxExclusive) {
 		this.maxExclusive = maxExclusive;
@@ -68,5 +68,9 @@ public class MaxExclusiveConstraintComponent extends SimpleAbstractConstraintCom
 	@Override
 	public List<Literal> getDefaultMessage() {
 		return List.of();
+	}
+
+	public Literal getMaxExclusive() {
+		return maxExclusive;
 	}
 }

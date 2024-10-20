@@ -30,7 +30,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.planNodes.PlanNode;
 
 public class MinInclusiveConstraintComponent extends SimpleAbstractConstraintComponent {
 
-	Literal minInclusive;
+	private Literal minInclusive;
 
 	public MinInclusiveConstraintComponent(Literal minInclusive) {
 		this.minInclusive = minInclusive;
@@ -70,4 +70,7 @@ public class MinInclusiveConstraintComponent extends SimpleAbstractConstraintCom
 		return List.of();
 	}
 
+	public Literal getMinInclusive() {
+		return minInclusive;
+	}
 }

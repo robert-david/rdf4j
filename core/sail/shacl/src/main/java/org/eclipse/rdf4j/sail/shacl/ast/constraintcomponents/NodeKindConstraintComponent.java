@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.sail.shacl.ast.planNodes.PlanNode;
 
 public class NodeKindConstraintComponent extends SimpleAbstractConstraintComponent {
 
-	NodeKind nodeKind;
+	private NodeKind nodeKind;
 
 	public NodeKindConstraintComponent(Resource nodeKind) {
 		this.nodeKind = NodeKind.from(nodeKind);
@@ -76,6 +76,10 @@ public class NodeKindConstraintComponent extends SimpleAbstractConstraintCompone
 	@Override
 	Function<PlanNode, FilterPlanNode> getFilterAttacher() {
 		return (parent) -> new NodeKindFilter(parent, nodeKind);
+	}
+
+	public NodeKind getNodeKind() {
+		return nodeKind;
 	}
 
 	public enum NodeKind {
